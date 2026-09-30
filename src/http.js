@@ -95,7 +95,7 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).hr
  const allowedHosts=(process.env.ALLOWED_HOSTS||'localhost,127.0.0.1,[::1]').split(',').map(s=>s.trim()).filter(Boolean);
  if(!['127.0.0.1','localhost','::1'].includes(host)&&!process.env.ALLOWED_HOSTS)throw new Error('Set ALLOWED_HOSTS explicitly when binding beyond loopback');
  const app=createApp({allowedHosts,allowedOrigins:(process.env.ALLOWED_ORIGINS||'').split(',').filter(Boolean),mcpToken:process.env.MCP_TOKEN||''});
- const server=app.listen(port,host,()=>console.error(`Hotspot Explorer for Wireless@SGX listening on ${host}:${port}`));
+ const server=app.listen(port,host,()=>console.error(`Wi-Fi Explorer for Wireless@SGX listening on ${host}:${port}`));
  server.requestTimeout=30000;server.headersTimeout=15000;
  for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>{server.close(()=>process.exit(0));setTimeout(()=>{server.closeAllConnections();process.exit(0);},5000).unref();});
 }

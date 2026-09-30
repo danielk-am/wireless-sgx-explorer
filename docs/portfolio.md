@@ -1,6 +1,6 @@
 # Automation portfolio: one catalogue, two platforms
 
-Hotspot Explorer for Wireless@SGX demonstrates a practical connectivity assistant for remote workers and people exploring Singapore. n8n remains a first-class portfolio integration. Activepieces offers the same five read-only operations through a real custom piece and a built-in HTTP alternative.
+Wi-Fi Explorer for Wireless@SGX demonstrates a practical connectivity assistant for remote workers and people exploring Singapore. n8n remains a first-class portfolio integration. Activepieces offers the same five read-only operations through a real custom piece and a built-in HTTP alternative.
 
 The mobile map, MCP tools, n8n and Activepieces all use one shared lookup engine. No workflow carries a separate hotspot database. All responses retain source dates, floor descriptions, coordinate provenance, incomplete ranking and structured lookup failures. None confirms usable signal, seating, power sockets, opening hours or access permission.
 

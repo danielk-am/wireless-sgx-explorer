@@ -1,4 +1,4 @@
-# Hotspot Explorer for Wireless@SGX — Activepieces custom piece
+# Wi-Fi Explorer for Wireless@SGX — Activepieces custom piece
 
 Five real action implementations call your self-hosted Explorer's shared `POST /api/lookup` endpoint: `nearest_hotspots`, `search_hotspots`, `search_venues`, `get_hotspot`, and `dataset_info`. This package contains no catalogue copy. It is a portfolio integration for finding listed Singapore connectivity venues, with provenance and uncertainty preserved.
 

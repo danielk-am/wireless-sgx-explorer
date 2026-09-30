@@ -1,7 +1,7 @@
 {
   "name": "@wireless-sgx/piece-wireless-sgx",
   "version": "0.1.0",
-  "description": "Hotspot Explorer for Wireless@SGX: nearby connectivity venues from the shared catalogue API",
+  "description": "Wi-Fi Explorer for Wireless@SGX: nearby connectivity venues from the shared catalogue API",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

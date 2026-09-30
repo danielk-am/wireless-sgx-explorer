@@ -1,4 +1,4 @@
-# Hotspot Explorer for Wireless@SGX
+# Wi-Fi Explorer for Wireless@SGX
 
 A Singapore connectivity explorer for digital nomads, remote workers and curious wanderers. Find listed venues, read the floor details, and open walking directions. The same catalogue powers the mobile map, local/remote MCP server, n8n portfolio workflow and Activepieces integration.
 
