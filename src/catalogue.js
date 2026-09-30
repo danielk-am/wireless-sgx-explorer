@@ -33,15 +33,21 @@ try {
   requireData(typeof metadata.refresh_mode==='string'&&metadata.refresh_mode.trim().length>0,'metadata.refresh_mode is required.');
   if (metadata.retrieved_at!==undefined) requireData(validDate(metadata.retrieved_at),'metadata.retrieved_at must be a valid YYYY-MM-DD date.');
   if (metadata.catalogue_sha256!==undefined) requireData(typeof metadata.catalogue_sha256==='string'&&/^[a-f0-9]{64}$/.test(metadata.catalogue_sha256)&&createHash('sha256').update(bytes).digest('hex')===metadata.catalogue_sha256,'catalogue_sha256 does not match the exact catalogue JSON bytes.');
-  const ids=new Set(), serials=new Set();
+  requireData(metadata.source_format===undefined||['pdf','geojson'].includes(metadata.source_format),'unsupported source_format.');
+  const ids=new Set(), serials=new Set(), featureIds=new Set();
   for (const r of records) {
     requireData(r&&typeof r==='object'&&!Array.isArray(r),'each row must be an object.');
     requireData(typeof r.id==='string'&&/^wsgx-\d{4}$/.test(r.id)&&!ids.has(r.id),'row IDs must be unique wsgx-NNNN strings.');ids.add(r.id);
     requireData(Number.isInteger(r.serial)&&r.serial>0&&!serials.has(r.serial),`${r.id}: serial must be unique and positive.`);serials.add(r.serial);
-    for (const field of ['location','address']) requireData(typeof r[field]==='string'&&r[field].trim().length>0,`${r.id}: ${field} is required.`);
+    for (const field of ['location','address']) requireData(typeof r[field]==='string'&&(r[field].trim().length>0||(field==='address'&&metadata.source_format==='geojson')),`${r.id}: ${field} is required.`);
     requireData(typeof r.postal_code==='string'&&/^\d{6}$/.test(r.postal_code),`${r.id}: postal_code must contain six digits.`);
-    requireData(['M1','Singtel','StarHub'].includes(r.operator),`${r.id}: unknown operator.`);
-    requireData(Number.isInteger(r.source_page)&&r.source_page>0,`${r.id}: source_page must be positive.`);
+    requireData(['M1','Singtel','StarHub','MyRepublic'].includes(r.operator),`${r.id}: unknown operator.`);
+    if (metadata.source_format==='geojson') {
+      requireData(r.source_page===null,`${r.id}: GeoJSON has no PDF page.`);
+      requireData(typeof r.source_feature_id==='string'&&r.source_feature_id.trim().length>0&&!featureIds.has(r.source_feature_id),`${r.id}: GeoJSON needs a unique source_feature_id.`);featureIds.add(r.source_feature_id);
+    } else {
+      requireData(Number.isInteger(r.source_page)&&r.source_page>0,`${r.id}: source_page must be positive.`);
+    }
     requireData(r.source_url===metadata.url&&r.source_date===metadata.date,`${r.id}: source provenance differs from metadata.`);
     const missing=r.latitude===null&&r.longitude===null;
     requireData(missing||(Number.isFinite(r.latitude)&&Number.isFinite(r.longitude)&&r.latitude>=1.1&&r.latitude<=1.5&&r.longitude>=103.5&&r.longitude<=104.2),`${r.id}: coordinates must both be null or finite numbers within Singapore bounds.`);
@@ -56,7 +62,7 @@ const aliases = {rd:'road',st:'street',ave:'avenue',blk:'block',ctr:'centre',cen
 const searchable = s => normalize(s).split(' ').map(t => aliases[t] || t).join(' ');
 const point = r => Number.isFinite(r.latitude) && Number.isFinite(r.longitude);
 const groupKey = r => `${normalize(r.address)}|${r.postal_code}`;
-const maps = r => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${r.address}, Singapore ${r.postal_code}`)}`;
+const maps = r => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${r.address||r.location}, Singapore ${r.postal_code}`)}`;
 const basic = r => ({...r,hotspot_id:r.id,source_serial:r.serial,google_maps_url:maps(r)});
 const groups = new Map();
 for (const r of records) { const k=groupKey(r); if (!groups.has(k)) groups.set(k,[]); groups.get(k).push(r); }
@@ -115,7 +121,7 @@ function run(operation,a) {
   }
   if (operation==='search_hotspots'||operation==='search_venues') {
     if(queryError(a.query)) return error('INVALID_QUERY','query must contain letters or numbers and be 1–200 characters.');
-    if(a.operator!==undefined&&!['M1','Singtel','StarHub'].includes(a.operator)) return error('INVALID_OPERATOR','operator must be M1, Singtel or StarHub.');
+    if(a.operator!==undefined&&!['M1','Singtel','StarHub','MyRepublic'].includes(a.operator)) return error('INVALID_OPERATOR','operator must be M1, Singtel, StarHub or MyRepublic.');
     const result=operation==='search_venues'?venueRecords.filter(v=>matches(a.query,venueText(v))):records.filter(r=>(!a.operator||a.operator===r.operator)&&matches(a.query,`${r.location} ${r.address} ${r.postal_code}`)).map(basic);
     return {ok:true,...common,total_matches:result.length,returned:Math.min(result.length,limit),results:result.slice(0,limit)};
   }
@@ -138,7 +144,7 @@ function run(operation,a) {
     origin={latitude:v.latitude,longitude:v.longitude,query:a.query,venue_id:v.venue_id,resolved_address:v.address,postal_code:v.postal_code,source:v.coordinate_source,coordinate_source_date:v.coordinate_source_date};
   }
   const ranked=mapped.map(v=>({v,d:distance(origin,v)})).filter(({d})=>a.radius_m===undefined||d<=a.radius_m).sort((x,y)=>x.d-y.d||x.v.venue_id.localeCompare(y.v.venue_id));
-  return {ok:true,origin,ranking:'straight_line_distance_to_matched_venue_coordinate',search_radius_m:a.radius_m??null,total_matching_venues:ranked.length,returned:Math.min(limit,ranked.length),results:ranked.slice(0,limit).map(({v,d})=>({...v,distance_m:Math.round(d),walking_distance_m:null,google_walking_directions_url:`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(`${origin.latitude},${origin.longitude}`)}&destination=${encodeURIComponent(`${v.address}, Singapore ${v.postal_code}`)}&travelmode=walking`}))};
+  return {ok:true,origin,ranking:'straight_line_distance_to_matched_venue_coordinate',search_radius_m:a.radius_m??null,total_matching_venues:ranked.length,returned:Math.min(limit,ranked.length),results:ranked.slice(0,limit).map(({v,d})=>({...v,distance_m:Math.round(d),walking_distance_m:null,google_walking_directions_url:`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(`${origin.latitude},${origin.longitude}`)}&destination=${encodeURIComponent(`${v.address||v.name}, Singapore ${v.postal_code}`)}&travelmode=walking`}))};
 }
 export function lookup(operation, argumentsObject={}) {
   const result=run(operation,argumentsObject);

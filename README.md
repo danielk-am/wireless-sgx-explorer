@@ -12,7 +12,18 @@ A Singapore connectivity explorer for digital nomads, remote workers and curious
 - An importable n8n portfolio demo, plus an Activepieces custom piece prototype and built-in HTTP-action recipe.
 - Locked dependencies, Docker/Compose configuration, provenance checks and actual MCP-client tests.
 
-## Data and coverage
+## Public open-data edition
+
+The public launch uses the openly licensed data.gov.sg catalogue: **1,800 historical records grouped into 1,306 mapped venues**. The dataset page is dated **6 June 2024**; every embedded record carries **18 March 2020**. These are historical listings, not a current inventory. This edition is separate from the March 2026 local prototype below; their membership and nearest results differ. Both map and MCP within an edition share the same data.
+
+```sh
+npm ci --ignore-scripts
+HOTSPOTS_DATA_PATH=data/public-hotspots.json HOTSPOTS_METADATA_PATH=data/public-metadata.json npm start
+```
+
+The public files are included under the [Singapore Open Data Licence](https://data.gov.sg/open-data-licence), with IMDA attribution in their metadata and the site. `Dockerfile.public` builds this edition without the PDF-derived catalogue. See [hosting](docs/hosting.md) and [advertising options](docs/monetization.md).
+
+## Local PDF prototype: data and coverage
 
 The validated local March 2026 IMDA snapshot contains **3,855 hotspot entries grouped into 763 venues**. **507 venues** have conservative matches to historical June 2024 IMDA coordinates; **256 remain unlocated**. All venues are searchable; only located venues are pinned and ranked. The map and MCP use the exact same representative point per venue.
 

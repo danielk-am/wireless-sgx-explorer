@@ -1,6 +1,6 @@
 # Visual identity
 
-The Explorer uses white surfaces, deep teal controls and blue accents, following Daniel's requested direction. An exact existing shared white/teal token file was not identified; these are dedicated project tokens, not a claim to reproduce another brand guide.
+The Explorer uses white surfaces, deep teal controls and blue accents. Daniel adopted this palette on 30 September 2026 as the default for all danielk.am creations. The canonical color-tokens.css lives in the shared danielk.am brand folder; public/tokens.css is this project's matching copy.
 
 Edit `public/tokens.css` to update the palette. Components use semantic properties, and Leaflet markers read the same tokens from computed CSS. Avoid introducing hex colors in component CSS or map JavaScript.
 

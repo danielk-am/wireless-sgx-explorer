@@ -37,3 +37,9 @@ This build has SDK-level protocol evidence, not a new ChatGPT installation or pu
 ## Source updates and public data
 
 Review the rights and source age before serving data publicly. Keep source membership separate from coordinate enrichment, preserve match provenance, and reject out-of-bounds/ambiguous positions. Importer output goes to ignored files. Refreshes are explicit; no hidden timer, background location tracking or automatic remote upload exists.
+
+## Open-data public image
+
+`Dockerfile.public` packages only the separately licensed data.gov.sg snapshot: 1,800 records grouped into 1,306 venues. It does not package the March 2026 PDF catalogue. Build with `docker build -f Dockerfile.public -t wireless-sgx-explorer:public .`. Set `ALLOWED_HOSTS=wireless.danielk.am,localhost,127.0.0.1,[::1]` for the approved public hostname. The image selects both public files explicitly, avoiding any fallback to the local PDF data. The user approved this source and hostname on 30 September 2026. Current availability is unverified; dataset-page date is 6 June 2024 and embedded record timestamps are 18 March 2020. See `docs/data.md` for attribution.
+
+A separate public image keeps the original local/default catalogue and its regression tests intact. Rollback restores the preceding image; do not substitute the local March 2026 files into the public image. Deployment status and externally verified checks must be recorded separately from this build recipe.

@@ -1,0 +1,18 @@
+{
+  "url": "https://data.gov.sg/datasets/d_d8644084f8b54f851a1acbb2f04d5089/view",
+  "title": "IMDA Wireless HotSpots (GEOJSON)",
+  "date": "2024-06-06",
+  "source_format": "geojson",
+  "sha256": "a9f7ee90ff1e62c3ebd341bb86933612a9d8b8293cde61444d880192ea120628",
+  "retrieved_at": "2026-09-30",
+  "coordinate_dataset_url": "https://data.gov.sg/datasets/d_d8644084f8b54f851a1acbb2f04d5089/view",
+  "coordinate_dataset_date": "2024-06-06",
+  "refresh_mode": "versioned_open_data_snapshot",
+  "catalogue_sha256": "9e7c6c5074b5fce0dcd663ffc301efcbeeb7f47e5430a25cbbbf828d39d46afd",
+  "source_feature_updated_at": "2020-03-18",
+  "date_note": "data.gov.sg lists 6 June 2024 as the dataset update date. Every source feature carries FMEL_UPD_D 20200318162531; this is a historical catalogue, not a live inventory.",
+  "license_url": "https://data.gov.sg/open-data-licence",
+  "license_name": "Singapore Open Data Licence version 1.0",
+  "attribution": "Contains information from IMDA Wireless HotSpots (GEOJSON), accessed 2026-09-30 from data.gov.sg, made available under the Singapore Open Data Licence version 1.0.",
+  "source_record_count": 1800
+}

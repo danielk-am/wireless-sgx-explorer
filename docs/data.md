@@ -1,5 +1,26 @@
 # Catalogue provenance and map agreement
 
+## Public launch: openly licensed historical catalogue
+
+The public deployment uses **only** `data/public-hotspots.json` with companion `data/public-metadata.json`, built from [IMDA Wireless HotSpots (GEOJSON) on data.gov.sg](https://data.gov.sg/datasets/d_d8644084f8b54f851a1acbb2f04d5089/view). It contains **1,800 source features grouped into 1,306 mapped venues**. The original March 2026 local catalogue is retained separately and is not included in the public deployment.
+
+The official catalogue page says **last updated 6 June 2024**. All 1,800 features contain `FMEL_UPD_D: 20200318162531` (18 March 2020). Both dates are disclosed in metadata: the catalogue update date must not imply current hotspot availability. Historical Fortune Centre/Acctrain Academy membership is valid for this older snapshot, even though it is absent from the separate March 2026 PDF snapshot. The public map and public MCP use this same older source, so they agree with each other.
+
+Source download SHA-256: `a9f7ee90ff1e62c3ebd341bb86933612a9d8b8293cde61444d880192ea120628`. Retrieved 30 September 2026 through the official poll-download endpoint. Every row retains the genuine `kml_N` source feature ID and embedded update timestamp. `source_page` is null because there is no PDF. Two missing street addresses are preserved as empty strings; the supplied names, postcodes and coordinates remain available. Operators include historic MyRepublic listings; this does not assert their present operator.
+
+The official dataset page expressly states personal and commercial reuse under the [Singapore Open Data Licence version 1.0](https://data.gov.sg/open-data-licence). Dataset and licence pages were fetched directly and checked on 30 September 2026. Required attribution is included in metadata for conspicuous display: “Contains information from IMDA Wireless HotSpots (GEOJSON), accessed 2026-09-30 from data.gov.sg, made available under the Singapore Open Data Licence version 1.0.” Link both the source and current licence; do not imply official status or endorsement. The software licence does not replace this data licence.
+
+Reproduce the public files with `python3 scripts/import-open-data.py` (Python standard library only), or pass `--source /path/to/download.geojson`. The importer pins the reviewed source hash and refuses changed downloads until dates and schema have been reviewed. It never overwrites `data/hotspots.json` or `data/metadata.json`.
+
+```sh
+HOTSPOTS_DATA_PATH=data/public-hotspots.json HOTSPOTS_METADATA_PATH=data/public-metadata.json node scripts/validate-data.js
+node --test test/public-catalogue.test.js
+```
+
+Set both environment variables in the public deployment. The source-date and feature-ID schema is validated on startup. Tests cover source purity, dates, counts, MyRepublic filtering and agreement between map representatives and nearest results. All points being mapped only makes ranking complete *within this historical catalogue*, not across currently operating Singapore hotspots.
+
+## Separate local March 2026 snapshot
+
 The local working snapshot contains 3,855 entries from the [IMDA March 2026 Wireless@SG hotspot PDF](https://www.imda.gov.sg/assets/9a4b742c-3a3f-4ce7-ae22-b5bb421fcdfb.pdf), retrieved 30 September 2026. PDF SHA-256: `0b40c373a802651269501fe80ee547160e4b26eb04fc63550edf414dd492be25`. Source page, serial, date and URL remain attached to every entry. The PDF determines membership. The older coordinate source cannot add locations omitted from this PDF.
 
 Entries are grouped by normalized address plus postal code into 763 venues. The 507 geolocated venues contain 2,725 entries; 256 venues containing 1,130 entries have no coordinate. Missing coordinates are `null`, never zero. The [IMDA coordinate dataset hosted by data.gov.sg](https://data.gov.sg/datasets/d_d8644084f8b54f851a1acbb2f04d5089/view) is dated 6 June 2024. Coordinates were joined on postal code and normalized address. Their age is disclosed separately from the PDF date.
@@ -49,6 +70,8 @@ The companion metadata object requires these fields:
 
 Replace the illustrative digest with the actual source-document SHA-256. Source and coordinate URLs must be HTTPS and contain no embedded credentials. The source date accepts a valid `YYYY-MM` or `YYYY-MM-DD`; coordinate date requires `YYYY-MM-DD`. Optional `retrieved_at` requires `YYYY-MM-DD`. Optional `catalogue_sha256` must equal the SHA-256 of the **exact catalogue JSON file bytes**, including whitespace; this binds metadata to a particular extracted file. Digest validation establishes consistency, not permission or authenticity.
 
-Every row requires a unique `wsgx-NNNN` ID, unique positive integer `serial`, nonempty `location` and `address`, six-digit string `postal_code`, operator `M1`, `Singtel` or `StarHub`, positive integer `source_page`, and `source_url`/`source_date` equal to the companion metadata. Coordinates must both be null or both finite numbers within latitude 1.1–1.5 and longitude 103.5–104.2. Located rows' `coordinate_source` and `coordinate_source_date` must match the metadata. Unlocated rows must set both provenance fields to null. Current schema requires `coverage_radius_m: null`, `coverage_status: "not_published"`, and `operational_status: "unverified"`; stronger claims need a separately reviewed schema and evidence.
+Every row requires a unique `wsgx-NNNN` ID, unique positive integer `serial`, nonempty `location` and `address`, six-digit string `postal_code`, operator `M1`, `Singtel`, `StarHub` or `MyRepublic`, positive integer `source_page` for PDF sources, and `source_url`/`source_date` equal to the companion metadata. Coordinates must both be null or both finite numbers within latitude 1.1–1.5 and longitude 103.5–104.2. Located rows' `coordinate_source` and `coordinate_source_date` must match the metadata. Unlocated rows must set both provenance fields to null. Current schema requires `coverage_radius_m: null`, `coverage_status: "not_published"`, and `operational_status: "unverified"`; stronger claims need a separately reviewed schema and evidence.
 
 Run validation with the same two environment variables. Custom validation checks structure, provenance and grouping without asserting the original snapshot's fixed counts. The full original catalogue tests still intentionally target the March 2026 snapshot. Licence-safe synthetic fixtures must identify their own test sources and dates.
+
+For `source_format: "geojson"`, each row instead requires `source_page: null` and a unique nonempty `source_feature_id`; street address may be an empty string if absent upstream. Other provenance and coordinate rules still apply. Omitted `source_format` retains the original PDF validation rules.

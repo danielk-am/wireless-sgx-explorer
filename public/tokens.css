@@ -1,6 +1,6 @@
-/* Wireless@SGX Explorer — white / teal / blue palette.
-   Project palette based on Daniel's requested direction; exact shared brand
-   token source has not yet been identified. All UI and map colors bind here. */
+/* danielk.am default color tokens v1 — adopted by Daniel on 2026-09-30.
+   White surfaces, teal primary, blue accent. Canonical source: danielk.am
+   brand/color-tokens.css in Daniel's shared Drive. Keep project copies aligned. */
 :root {
   color-scheme: light;
   --color-white: #FFFFFF;

@@ -8,8 +8,9 @@ assert.match(metadata.date,/^\d{4}-\d{2}(?:-\d{2})?$/);
 const ids=new Set();
 for(const r of rows){
  assert.match(r.id,/^wsgx-\d{4}$/);assert.ok(!ids.has(r.id),`Duplicate ${r.id}`);ids.add(r.id);
- for(const k of ['location','address','postal_code','operator','source_url','source_date'])assert.ok(typeof r[k]==='string'&&r[k].length,`${r.id}: ${k}`);
- assert.match(r.postal_code,/^\d{6}$/);assert.ok(Number.isInteger(r.source_page)&&r.source_page>0);
+ for(const k of ['location','address','postal_code','operator','source_url','source_date'])assert.ok(typeof r[k]==='string'&&(r[k].length||(k==='address'&&metadata.source_format==='geojson')),`${r.id}: ${k}`);
+ assert.match(r.postal_code,/^\d{6}$/);
+ if(metadata.source_format==='geojson'){assert.equal(r.source_page,null);assert.ok(r.source_feature_id);}else{assert.ok(Number.isInteger(r.source_page)&&r.source_page>0);}
  assert.equal(r.source_url,metadata.url);assert.equal(r.source_date,metadata.date);
  assert.equal(r.coverage_radius_m,null);assert.equal(r.coverage_status,'not_published');assert.equal(r.operational_status,'unverified');
  assert.equal(r.latitude===null,r.longitude===null);

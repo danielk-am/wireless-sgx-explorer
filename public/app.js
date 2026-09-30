@@ -19,7 +19,7 @@ function card(venue) {
   const node = el('article', undefined, 'card'); node.id = `venue-${venue.venue_id}`;
   const top = el('div', undefined, 'card-top'); top.append(el('h3', venue.name));
   const distance = distanceLabel(venue.distance_m); if (distance) top.append(el('span', distance, 'distance')); node.append(top);
-  node.append(el('p', `${venue.address}, Singapore ${venue.postal_code}`, 'address'));
+  node.append(el('p', `${venue.address || 'Street address not supplied'}, Singapore ${venue.postal_code}`, 'address'));
   const badges = el('div', undefined, 'badges'); badges.append(el('span', `${venue.listed_hotspot_count} listed hotspot${venue.listed_hotspot_count === 1 ? '' : 's'}`, 'badge'));
   badges.append(el('span', hasCoordinates(venue) ? 'Venue coordinates' : 'Not yet located on map', `badge${hasCoordinates(venue) ? '' : ' unlocated'}`)); node.append(badges);
   const details = el('details'); details.append(el('summary', 'View floors & hotspot details'));
@@ -90,6 +90,13 @@ async function load() {
     if (data.metadata?.catalogue_date && data.metadata?.coordinate_dataset_date) {
       const dates = `Catalogue: ${data.metadata.catalogue_date}. Coordinate reference: ${data.metadata.coordinate_dataset_date}.`; $('source-note').textContent = dates; $('catalogue-date').textContent = ` · ${dates}`;
     }
+    const source = data.metadata?.source || {};
+    for (const [id, url] of [['catalogue-link', source.url], ['source-link', source.url], ['coordinate-link', source.coordinate_dataset_url], ['license-link', source.license_url]]) {
+      try { const parsed = new URL(url); if (parsed.protocol !== 'https:' || parsed.username || parsed.password) continue; $(id).href = parsed.href; $(id).hidden = false; } catch {}
+    }
+    $('source-age').textContent = source.date_note || '';
+    $('source-attribution').textContent = source.attribution || '';
+    if (source.source_format === 'geojson') $('catalogue-date').textContent += ` Records dated ${source.source_feature_updated_at || 'unknown'}. Historical dataset; current availability unverified.`;
     const located = data.venues.filter(hasCoordinates).length; const entries = data.venues.reduce((total, v) => total + v.listed_hotspot_count, 0);
     $('counts').replaceChildren(...[[entries, 'hotspot entries'], [data.venues.length, 'venues'], [located, 'mapped venues'], [data.venues.length - located, 'awaiting coordinates']].map(([value, label]) => { const node = el('span'); node.append(el('strong', number(value)), document.createTextNode(label)); return node; }));
     browse($('query').value);
