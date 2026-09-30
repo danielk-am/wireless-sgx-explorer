@@ -132,7 +132,7 @@ async function load() {
       if (!configResponse.ok) throw new Error('Configuration unavailable');
       state.mapsKey = config.googleMapsBrowserKey || '';
       if (state.mapsKey) {
-        $('google-search').hidden = false;
+        $('google-search').hidden = false; $('catalogue-summary').hidden = false; $('catalogue-search').open = false;
         $('map-privacy').replaceChildren(document.createTextNode('Google place search and maps receive your IP address, typed searches and viewed area. A selected starting point is sent to this service for distance lookup and is not stored. '));
         const privacy = el('a', 'Privacy and terms'); privacy.href = '/privacy.html'; $('map-privacy').append(privacy);
         $('google-enable').addEventListener('click', enableGoogleSearch);
@@ -153,6 +153,7 @@ async function load() {
     const located = data.venues.filter(hasCoordinates).length; const entries = data.venues.reduce((total, v) => total + v.listed_hotspot_count, 0);
     $('counts').replaceChildren(...[[entries, 'hotspot entries'], [data.venues.length, 'venues'], [located, 'mapped venues'], [data.venues.length - located, 'awaiting coordinates']].map(([value, label]) => { const node = el('span'); node.append(el('strong', number(value)), document.createTextNode(label)); return node; }));
     browse();
+    if (state.mapsKey) enableGoogleSearch();
   } catch { status('The catalogue could not load. Check your connection and try again.'); const retry = el('button', 'Retry catalogue', 'secondary'); retry.addEventListener('click', load); $('results').replaceChildren(retry); }
 }
 async function enableGoogleSearch() {
@@ -164,14 +165,14 @@ async function enableGoogleSearch() {
       nearest(origin.latitude, origin.longitude, origin.label);
     }, (error, request) => {
       if (request !== undefined && request !== state.request) return;
-      busy(false); status(error.message);
+      busy(false); $('catalogue-search').open = true; status(error.message);
     }, () => { const request = ++state.request; busy(true); status('Finding the selected place…'); return request; });
     $('google-enable').hidden = true;
     status('Select a Google suggestion to find nearby hotspots automatically.');
-  } catch (error) { status(error.message); $('google-enable').disabled = false; }
+  } catch (error) { status(error.message); $('google-enable').disabled = false; $('catalogue-search').open = true; }
 }
 window.addEventListener('wireless-google-error', () => {
-  ++state.request; busy(false); status('Google search or map could not authenticate. Catalogue search, coordinates and Use my location remain available.');
+  ++state.request; busy(false); $('catalogue-search').open = true; status('Google search or map could not authenticate. Catalogue search, coordinates and Use my location remain available.');
 });
 $('search-form').addEventListener('submit', event => { event.preventDefault(); if (!state.loaded) return status('Please load the catalogue first using Retry catalogue.'); searchNearby(); });
 $('reset').addEventListener('click', () => { if (!state.loaded) return load(); $('query').value = ''; browse(); });
