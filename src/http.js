@@ -1,5 +1,6 @@
 import express from 'express';
-import { timingSafeEqual, randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { timingSafeEqual, randomUUID, randomBytes } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -11,7 +12,9 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const jsonError=(code,message)=>({ok:false,error:{code,message}});
 const equal=(a,b)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);};
 
-export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowedOrigins=[],mcpToken='',mapsBrowserKey=process.env.GOOGLE_MAPS_BROWSER_KEY||'',rateLimit=120}={}) {
+export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowedOrigins=[],mcpToken='',mapsBrowserKey=process.env.GOOGLE_MAPS_BROWSER_KEY||'',adsenseClient=process.env.ADSENSE_CLIENT||'',adsenseSlot=process.env.ADSENSE_SLOT||'',rateLimit=120}={}) {
+ const adsEnabled=/^ca-pub-[0-9]{16}$/.test(adsenseClient)&&/^[0-9]{10}$/.test(adsenseSlot);
+ const indexHtml=readFileSync(resolve(root,'public/index.html'),'utf8');
  const googleCsp = "default-src 'self'; script-src 'self' 'unsafe-eval' https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.google.com data: blob:; font-src 'self' https://fonts.gstatic.com; frame-src https://*.google.com; worker-src blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
  const app=express();app.disable('x-powered-by');
  app.use(hostHeaderValidation(allowedHosts));
@@ -62,6 +65,20 @@ export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowe
   catch {if(!res.headersSent)res.status(500).json({jsonrpc:'2.0',id:null,error:{code:-32603,message:'Internal server error'}});}
  });
  app.all('/mcp',(_req,res)=>res.status(405).set('Allow','POST').json({jsonrpc:'2.0',id:null,error:{code:-32000,message:'Stateless MCP supports POST only.'}}));
+ // Nonces are generated per document, never cached or reused across responses.
+ app.get(['/', '/index.html'],(_req,res,next)=>{
+  if(!adsEnabled)return next();
+  const nonce=randomBytes(24).toString('base64');
+  const ad=`<section class="network-ad" aria-label="Advertisement"><p class="banner-label">Advertisement</p><ins class="adsbygoogle" style="display:block" data-ad-client="${adsenseClient}" data-ad-slot="${adsenseSlot}" data-ad-format="auto" data-full-width-responsive="true"></ins></section>`;
+  const html=indexHtml.replace('<!-- ADSENSE_UNIT -->',ad)
+   .replace('</head>',`<link rel="stylesheet" href="/adsense.css?v=1"><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}"></script><script type="module" src="/adsense.js?v=1"></script></head>`)
+   .replace(/<script\b/g,`<script nonce="${nonce}"`);
+  res.set('Cache-Control','no-store');
+  // Google's supported strict CSP; trusted scripts may load their dependencies.
+  // HTTPS frames/images/connections support advertiser creatives and Google's CMP.
+  res.set('Content-Security-Policy',`default-src 'self'; script-src 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' https: data: blob:; font-src 'self' https:; frame-src https:; worker-src blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`);
+  res.type('html').send(html);
+ });
  app.use('/vendor/leaflet',express.static(resolve(root,'node_modules/leaflet/dist'),{dotfiles:'deny',index:false}));
  app.use(express.static(resolve(root,'public'),{dotfiles:'deny',index:'index.html'}));
  app.use((_req,res)=>res.status(404).json(jsonError('NOT_FOUND','Not found.')));

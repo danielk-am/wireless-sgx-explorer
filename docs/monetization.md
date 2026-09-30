@@ -51,3 +51,13 @@ To add an area, add a unique key under `slots`, then a corresponding element in 
 Keep it outside map controls, search, and result cards. Check mobile and desktop before deploying. Use `banner-slot--side` for desktop-only cards.
 
 For actual **Buy now**: first agree the placement, rate, duration and availability process, then replace the placeholder link with the verified hosted checkout URL and set `button` to `Buy this ad space`. Publish booking terms on the advertising page. A payment link alone does not reserve inventory or automatically publish a creative; that needs a separate booking/fulfilment workflow. Until those details exist, the shipped buttons intentionally say “Advertise here” and “Book this ad space” and lead to an enquiry.
+
+## Manual AdSense unit
+
+Set `ADSENSE_CLIENT` (ca-pub- plus 16 digits) and `ADSENSE_SLOT` (10 digits) in the runtime environment to enable one responsive ad below the explorer. Both are public identifiers; leave either blank to disable the integration. Do not commit account-specific values. Keep Auto ads disabled in AdSense to preserve manual placement.
+
+The configured homepage is served with a fresh script nonce and `Cache-Control: no-store`. Its strict CSP follows Google’s nonce/strict-dynamic approach; HTTPS frames, images and connections are permitted for ad creatives and consent services. Other routes retain the existing CSP. Do not place a caching rule over HTML that reuses nonce responses. See https://support.google.com/adsense/answer/16283098.
+
+The network ad is labelled Advertisement, separate from search and directions. A filled unit replaces the bottom enquiry card; unfilled or blocked ads leave that enquiry available. AdSense requests happen only once per page load, not on every search. Do not click live ads during testing.
+
+Before activation, verify the root-domain ads.txt entry, site approval state and Google CMP configuration. Approval and actual ad delivery are external to this app; an empty placement before approval is expected. Runtime smoke tests cannot prove monetisation or regional consent behaviour.

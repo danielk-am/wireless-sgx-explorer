@@ -8,6 +8,8 @@ services:
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,[::1]}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
       GOOGLE_MAPS_BROWSER_KEY: ${GOOGLE_MAPS_BROWSER_KEY:-}
+      ADSENSE_CLIENT: ${ADSENSE_CLIENT:-}
+      ADSENSE_SLOT: ${ADSENSE_SLOT:-}
       MCP_TOKEN: ${MCP_TOKEN:-}
       HOTSPOTS_DATA_PATH: /data/hotspots.json
       HOTSPOTS_METADATA_PATH: /data/metadata.json
