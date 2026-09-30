@@ -26,3 +26,28 @@ A disclosed affiliate offer can use this same card once a real affiliate relatio
 - Consent: https://support.google.com/adsense/answer/13554116
 
 The historical open-data launch and the March 2026 local PDF prototype are distinct releases. Monetization does not expand source-data licences. Preserve the public dataset attribution and historical dates.
+
+## Edit the live banner areas
+
+Two first-party enquiry placeholders are now configured in `public/banners.json`. They do not load an advertising network or tracking scripts. There is no admin dashboard: edit this file in GitHub or your checkout, commit it and redeploy the site in Coolify. The configuration is public; never put a token, password or private customer details in it.
+
+| Slot | Placement |
+| --- | --- |
+| `map-side` | Card below map information; shown only above 900px |
+| `explorer-bottom` | Banner below the explorer/results; mobile and desktop |
+
+For each slot, edit `title`, `description`, `button` and `url`. Set `state` to `available` for an enquiry placeholder, `sponsored` for a real advertiser (automatically labelled Sponsored), or `hidden` to remove it. A missing or invalid slot also stays hidden. Links support HTTPS or a local path. Do not include visitor location, search or route information in any advertising link.
+
+Optional `image` must be a path under `/banner-assets/`, e.g. `/banner-assets/campaign.webp`; put that file in `public/banner-assets/`. Supply `imageAlt` for meaningful creative text. Images use contain sizing, so nothing is cropped. Text and the button remain usable if an image fails. Recommended source artwork is 600×400 for the card and 900×600 for the wide banner's image area; these are flexible illustrated cards, not standard network ad units.
+
+Enquiries go through `/advertise.html` to `hey@danielk.am`, with the selected placement in the subject. This opens the visitor's mail app and does not send an email automatically. Edit that page to change the contact address or sales copy.
+
+To add an area, add a unique key under `slots`, then a corresponding element in `public/index.html`:
+
+```html
+<section class="banner-slot banner-slot--wide" data-banner-slot="new-slot" aria-label="Advertising space" hidden></section>
+```
+
+Keep it outside map controls, search, and result cards. Check mobile and desktop before deploying. Use `banner-slot--side` for desktop-only cards.
+
+For actual **Buy now**: first agree the placement, rate, duration and availability process, then replace the placeholder link with the verified hosted checkout URL and set `button` to `Buy this ad space`. Publish booking terms on the advertising page. A payment link alone does not reserve inventory or automatically publish a creative; that needs a separate booking/fulfilment workflow. Until those details exist, the shipped buttons intentionally say “Advertise here” and “Book this ad space” and lead to an enquiry.

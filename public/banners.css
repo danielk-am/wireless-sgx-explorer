@@ -1,0 +1,12 @@
+.banner-slot{border:1px dashed var(--color-border-strong);border-radius:14px;background:var(--color-brand-soft);padding:24px;display:flex;gap:24px;align-items:center;overflow-wrap:anywhere}
+.banner-copy{flex:1;min-width:0}.banner-label{font-size:10px;text-transform:uppercase;letter-spacing:1.6px;font-weight:750;color:var(--color-muted);margin:0 0 12px}
+.banner-copy h2{font-size:25px;line-height:1.2;margin:0 0 8px}.banner-copy>p:last-child{font-size:13px;color:var(--color-muted);margin:0;max-width:520px}
+.banner-button{display:inline-flex;justify-content:center;align-items:center;min-height:46px;padding:12px 18px;background:var(--color-brand);color:var(--color-white);border-radius:9px;font-size:13px;font-weight:650;text-decoration:none;text-align:center;flex-shrink:0;max-width:100%}
+.banner-button:hover{background:var(--color-brand-hover)}
+.banner-image{width:180px;height:120px;object-fit:contain;flex-shrink:0;border-radius:8px;background:var(--color-white)}
+.banner-slot--side{margin-top:24px;min-height:220px;align-items:flex-start;flex-direction:column;gap:16px}
+.banner-slot--side .banner-image{width:100%;height:180px}.banner-slot--wide{margin-top:36px;min-height:180px}
+.advertise-intro{max-width:740px;padding:56px 0 32px}.advertise-intro h1{font-size:clamp(36px,5vw,58px)}
+.advertise-options{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px}.advertise-option{border:1px solid var(--color-border);border-radius:14px;padding:28px;scroll-margin-top:24px}.advertise-option:target{outline:3px solid var(--color-blue)}.advertise-option p{color:var(--color-muted);font-size:14px}.advertise-note{max-width:740px;font-size:14px;color:var(--color-muted);margin-bottom:40px}
+@media(max-width:900px){.banner-slot--side{display:none}.banner-slot--wide{gap:18px}.banner-image{width:120px;height:100px}}
+@media(max-width:650px){.banner-slot--wide{flex-direction:column;align-items:stretch;padding:22px;margin-top:28px;min-height:230px}.banner-copy h2{font-size:24px}.banner-image{width:100%;height:160px}.advertise-options{grid-template-columns:1fr;gap:16px}.advertise-intro{padding-top:32px}.advertise-option{padding:22px}}

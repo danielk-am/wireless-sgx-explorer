@@ -1,0 +1,18 @@
+{
+  "slots": {
+    "map-side": {
+      "state": "available",
+      "title": "Your brand. Their next stop.",
+      "description": "Reach people exploring Singapore, one connection at a time.",
+      "button": "Advertise here",
+      "url": "/advertise.html#map-side"
+    },
+    "explorer-bottom": {
+      "state": "available",
+      "title": "A space for your next big idea.",
+      "description": "Put your business in front of Singapore explorers and remote workers.",
+      "button": "Book this ad space",
+      "url": "/advertise.html#explorer-bottom"
+    }
+  }
+}
