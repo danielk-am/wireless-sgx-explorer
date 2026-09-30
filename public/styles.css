@@ -120,3 +120,5 @@
 
 .catalogue-source{font-size:10px;color:var(--muted);margin:-14px 0 23px;line-height:1.7}
 .catalogue-source a{font-weight:600}
+
+#origin-choices:empty{display:none}#origin-choices{display:grid;gap:8px;margin-top:14px}#origin-choices button{text-align:left;min-height:46px;overflow-wrap:anywhere}

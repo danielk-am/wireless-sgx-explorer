@@ -1,7 +1,7 @@
 const colorToken = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 import { hasCoordinates, searchVenues, distanceLabel, safeGoogleUrl } from './helpers.js';
 const $ = id => document.getElementById(id);
-const state = { venues: [], shown: [], limit: 12, map: null, markers: null, origin: null, request: 0, loaded: false };
+const state = { venues: [], shown: [], limit: 12, map: null, markers: null, origin: null, startingPoint: null, request: 0, loaded: false };
 const number = value => value.toLocaleString('en-SG');
 async function requestJSON(url, options = {}) {
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 15000);
@@ -37,30 +37,59 @@ function render() {
   if (state.map) renderMarkers();
 }
 function browse(query = '') {
-  state.request++; busy(false); state.shown = query.trim() ? searchVenues(state.venues, query) : state.venues;
+  state.request++; busy(false); state.startingPoint = null; if (state.origin) { state.origin.remove(); state.origin = null; } $('origin-choices').replaceChildren(); state.shown = query.trim() ? searchVenues(state.venues, query) : state.venues;
   state.limit = 12; $('results-heading').textContent = query.trim() ? `Results for “${query.trim()}”` : 'Listed locations';
-  $('result-note').textContent = 'Catalogue matches include venues without coordinates. Select “Find nearby” on a located venue to use it as your starting point.';
+  $('result-note').textContent = 'Browsing all listed venues. Search a starting point or use your location to sort hotspots by distance.';
   status(query.trim() ? `${number(state.shown.length)} matching venues. This is a catalogue search, not a general address lookup.` : 'Browse the catalogue, or choose a starting point for a distance search.'); render();
 }
-async function nearest(latitude, longitude, label) {
+async function nearest(latitude, longitude, label, query) {
   if (!state.loaded) { status('The catalogue is not ready. Please retry loading it first.'); return; }
-  const request = ++state.request; busy(true); status(`Finding listed venues near ${label}…`);
+  const request = ++state.request; busy(true); $('origin-choices').replaceChildren(); status(`Finding listed venues near ${label}…`);
   try {
-    const { response, data } = await requestJSON('/api/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ operation: 'nearest_hotspots', arguments: { latitude, longitude, limit: 10 } }) });
+    const { response, data } = await requestJSON('/api/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ operation: 'nearest_hotspots', arguments: query === undefined ? { latitude, longitude, limit: 10 } : { query, limit: 10 } }) });
     if (request !== state.request) return;
+    if (data.error?.code === 'AMBIGUOUS_ORIGIN') {
+      const choices = $('origin-choices');
+      choices.append(el('p', 'Choose your starting point. We’ll find the nearest hotspots around it.', 'help'));
+      for (const candidate of data.candidates || []) {
+        const venue = state.venues.find(item => item.venue_id === candidate.venue_id);
+        if (!venue || !hasCoordinates(venue)) continue;
+        const button = el('button', `${venue.name} — ${venue.address}, ${venue.postal_code}`, 'secondary');
+        button.type = 'button'; button.addEventListener('click', () => nearest(venue.latitude, venue.longitude, venue.name)); choices.append(button);
+      }
+      if (!choices.querySelector('button')) {
+        choices.replaceChildren();
+        status('Matching places have no usable coordinates. Use your location, enter coordinates or choose a point on the map. Previous results remain visible.');
+        return;
+      }
+      status(`Several starting points match. Choose one below${data.candidate_count > 10 ? ' (first 10 matches; refine your search for more)' : ''}; previous results remain until you select.`);
+      choices.querySelector('button')?.focus();
+      return;
+    }
     if (!response.ok || !data.ok) throw new Error(data.error?.message || 'The lookup could not be completed.');
     if (!Array.isArray(data.results)) throw new Error('The lookup returned an unexpected response.');
+    latitude = data.origin.latitude; longitude = data.origin.longitude;
+    state.startingPoint = { latitude, longitude };
     state.shown = data.results; state.limit = 12; $('results-heading').textContent = `Near ${label}`;
     const located = state.venues.filter(hasCoordinates).length;
     $('result-note').textContent = `Approximate straight-line distance, not walking distance or signal range. Ranking covers ${number(located)} located venues; ${number(state.venues.length - located)} unlocated venues are excluded.`;
     status(`Found ${data.results.length} nearby listed venues. Check floor details and access before travelling.`);
-    if (state.map) {
-      if (state.origin) state.origin.remove(); state.origin = window.L.circleMarker([latitude, longitude], { bubblingMouseEvents: false, radius: 9, color: colorToken('--color-origin'), fillColor: colorToken('--color-origin'), fillOpacity: .85, weight: 3 }).addTo(state.map).bindTooltip('Your selected starting point');
-      state.map.setView([latitude, longitude], 15);
-    }
+    showStartingPoint();
     render();
   } catch (error) { if (request === state.request) status(`Unable to find nearby venues: ${error.message} Your previous results remain visible. Try again or browse the catalogue.`); }
   finally { if (request === state.request) busy(false); }
+}
+function showStartingPoint() {
+  if (!state.map || !state.startingPoint) return;
+  const { latitude, longitude } = state.startingPoint;
+  if (state.origin) state.origin.remove();
+  state.origin = window.L.circleMarker([latitude, longitude], { bubblingMouseEvents: false, radius: 9, color: colorToken('--color-origin'), fillColor: colorToken('--color-origin'), fillOpacity: .85, weight: 3 }).addTo(state.map).bindTooltip('Your selected starting point');
+  state.map.setView([latitude, longitude], 15);
+}
+function searchNearby() {
+  const query = $('query').value.trim();
+  if (!query) { status('Enter a starting place or postal code, or choose Use my location.'); $('query').focus(); return; }
+  nearest(undefined, undefined, query, query);
 }
 function renderMarkers() {
   state.markers.clearLayers();
@@ -79,7 +108,7 @@ async function showMap() {
     $('map').replaceChildren(); state.map = window.L.map('map', { scrollWheelZoom: false }).setView([1.3521, 103.8198], 11);
     const tiles = window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(state.map);
     tiles.on('tileerror', () => status('Some map tiles could not load. The location list and venue details are still available.'));
-    state.markers = window.L.layerGroup().addTo(state.map); renderMarkers();
+    state.markers = window.L.layerGroup().addTo(state.map); renderMarkers(); showStartingPoint();
     state.map.on('click', event => nearest(event.latlng.lat, event.latlng.lng, 'selected map point'));
   } catch { status('The map could not load. You can still search and browse all locations in the list.'); if (button.isConnected) { button.disabled = false; button.textContent = 'Retry map'; } }
 }
@@ -99,10 +128,10 @@ async function load() {
     if (source.source_format === 'geojson') $('catalogue-date').textContent += ` Records dated ${source.source_feature_updated_at || 'unknown'}. Historical dataset; current availability unverified.`;
     const located = data.venues.filter(hasCoordinates).length; const entries = data.venues.reduce((total, v) => total + v.listed_hotspot_count, 0);
     $('counts').replaceChildren(...[[entries, 'hotspot entries'], [data.venues.length, 'venues'], [located, 'mapped venues'], [data.venues.length - located, 'awaiting coordinates']].map(([value, label]) => { const node = el('span'); node.append(el('strong', number(value)), document.createTextNode(label)); return node; }));
-    browse($('query').value);
+    browse();
   } catch { status('The catalogue could not load. Check your connection and try again.'); const retry = el('button', 'Retry catalogue', 'secondary'); retry.addEventListener('click', load); $('results').replaceChildren(retry); }
 }
-$('search-form').addEventListener('submit', event => { event.preventDefault(); if (!state.loaded) return status('Please load the catalogue first using Retry catalogue.'); browse($('query').value); });
+$('search-form').addEventListener('submit', event => { event.preventDefault(); if (!state.loaded) return status('Please load the catalogue first using Retry catalogue.'); searchNearby(); });
 $('reset').addEventListener('click', () => { if (!state.loaded) return load(); $('query').value = ''; browse(); });
 $('more').addEventListener('click', () => { state.limit += 12; render(); });
 $('show-map').addEventListener('click', showMap);
