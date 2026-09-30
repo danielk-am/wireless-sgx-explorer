@@ -19,3 +19,5 @@
 .ad-placement:has(.network-ad:not(.ad-empty))>.banner-slot{visibility:hidden;pointer-events:none}
 .ad-placeholder{width:100%;text-align:center;color:var(--color-muted);font-size:13px}
 .banner-slot--side{min-height:316px}
+
+.banner-copy>p.banner-disclosure{margin-top:12px;font-size:13px;color:var(--color-muted)}

@@ -8,7 +8,7 @@ export function safeLink(value, origin) {
 }
 
 export function bannerSettings(settings, origin) {
-  if (!settings || !['available', 'sponsored'].includes(settings.state)) return null;
+  if (!settings || !['available', 'sponsored', 'affiliate'].includes(settings.state)) return null;
   const url = safeLink(settings.url, origin);
   if (!url || typeof settings.title !== 'string' || !settings.title.trim()) return null;
   let image = null;
@@ -20,7 +20,8 @@ export function bannerSettings(settings, origin) {
     state: settings.state, title: settings.title.slice(0, 120),
     description: typeof settings.description === 'string' ? settings.description.slice(0, 300) : '',
     button: typeof settings.button === 'string' && settings.button.trim() ? settings.button.slice(0, 60) : 'Learn more',
-    label: settings.state === 'sponsored' ? 'Sponsored' : 'Ad space available',
+    label: settings.state === 'affiliate' ? 'Affiliate' : settings.state === 'sponsored' ? 'Sponsored' : 'Ad space available',
+    disclosure: settings.state === 'affiliate' ? 'We may earn a commission if you buy through this link.' : '',
     url, image, imageAlt: typeof settings.imageAlt === 'string' ? settings.imageAlt.slice(0, 200) : ''
   };
 }
@@ -41,6 +42,12 @@ export async function loadBanners() {
       const heading = document.createElement('h2'); heading.textContent = settings.title;
       const description = document.createElement('p'); description.textContent = settings.description;
       content.append(label, heading, description);
+      if (settings.disclosure) {
+        const disclosure = document.createElement('p');
+        disclosure.className = 'banner-disclosure';
+        disclosure.textContent = settings.disclosure;
+        content.append(disclosure);
+      }
       const link = document.createElement('a');
       link.className = 'banner-button'; link.href = settings.url; link.textContent = settings.button;
       link.rel = 'sponsored noopener noreferrer'; link.referrerPolicy = 'no-referrer';

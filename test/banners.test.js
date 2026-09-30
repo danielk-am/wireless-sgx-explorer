@@ -18,3 +18,11 @@ test('paid creatives are always labelled and images stay local', () => {
   assert.equal(bannerSettings({ ...sample, image: '/banner-assets/../app.js' }, origin).image, null);
   assert.equal(bannerSettings({ ...sample, image: '/banner-assets/campaign.png' }, origin).image, origin + '/banner-assets/campaign.png');
 });
+test('affiliate offers enforce a clear label and commission disclosure', () => {
+  const settings = bannerSettings({ ...sample, state: 'affiliate', label: 'Recommended', disclosure: '' }, origin);
+  assert.ok(settings);
+  assert.equal(settings.label, 'Affiliate');
+  assert.equal(settings.disclosure, 'We may earn a commission if you buy through this link.');
+  assert.equal(bannerSettings(sample, origin).disclosure, '');
+  assert.equal(bannerSettings({ ...sample, state: 'affiliate', url: '' }, origin), null);
+});

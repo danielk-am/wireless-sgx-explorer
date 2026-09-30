@@ -63,3 +63,24 @@ The network ad is labelled Advertisement, separate from search and directions. A
 Before activation, verify the root-domain ads.txt entry, site approval state and Google CMP configuration. Approval and actual ad delivery are external to this app; an empty placement before approval is expected. Runtime smoke tests cannot prove monetisation or regional consent behaviour.
 
 The listings show three cards initially and add three per Show more action. The reserved ad placement follows that button with a 48px separation and divider. Server-rendered placeholders reserve space before banner configuration arrives; network and enquiry content share the same reserved region. Desktop listing scrollbars become visible on hover or keyboard focus. These placements are candidates for measurement, not proven highest-CTR locations.
+
+
+## Airalo affiliate card (pending approval)
+
+Airalo's application was received on 30 September 2026. The live banner configuration remains unchanged until approval and an actual affiliate tracking link are available.
+
+Set a banner's `state` to `affiliate` to render an enforced Affiliate label and commission disclosure. Configuration cannot override or remove that disclosure. Links retain `rel="sponsored noopener noreferrer"` and do not receive visitor coordinates or search text.
+
+After approval, update `public/banners.json` → `slots.map-side` with:
+
+- `state`: `affiliate`
+- `title`: `Need mobile data between hotspots?`
+- `description`: `Explore Airalo Singapore eSIM plans. Check your device supports eSIM before buying.`
+- `button`: `View eSIM plans ↗`
+- `url`: the actual approved Impact tracking URL for Singapore plans.
+
+Do not insert a consumer referral code or an invented tracking URL. Verify the destination without making a purchase, preview the disclosure at desktop widths, and redeploy. The existing map-side placement is desktop-only; AdSense and its fallback remain below the listings on mobile and desktop. No Airalo tracking script is required for this ordinary affiliate link.
+
+## Klook placement
+
+The map-side desktop card uses the Klook-generated Singapore destination link for Explorer affiliate ID 137209 and ad ID 1467353. It is labelled Affiliate with the enforced commission disclosure. No third-party Klook script or visitor-location parameters are added. Mobile retains the existing AdSense/fallback placement below listings; the map-side card remains desktop-only. Airalo and Saily remain inactive pending approval.
