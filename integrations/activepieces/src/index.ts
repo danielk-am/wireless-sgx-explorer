@@ -4,7 +4,7 @@ import { request as httpsRequest } from 'node:https';
 
 export const wirelessSgxAuth = PieceAuth.CustomAuth({
   displayName: 'Explorer API connection', required: true,
-  description: 'Your self-hosted Wireless@SGX Explorer API. Use HTTPS except on localhost. Optional token is stored in the connection, never in the flow.',
+  description: 'Your self-hosted Hotspot Explorer for Wireless@SGX API. Use HTTPS except on localhost. Optional token is stored in the connection, never in the flow.',
   props: {
     baseUrl: Property.ShortText({ displayName: 'API base URL', required: true }),
     token: PieceAuth.SecretText({ displayName: 'API bearer token (optional)', required: false }),
@@ -86,7 +86,7 @@ const datasetInfo = createAction({
   async run(context) { return requestLookup(context.auth.props, 'dataset_info', {}); },
 });
 export const wirelessSgx = createPiece({
-  displayName: 'Wireless@SGX Explorer', description: 'Find listed connectivity venues in Singapore using one shared, source-dated catalogue.',
+  displayName: 'Hotspot Explorer for Wireless@SGX', description: 'Find listed connectivity venues in Singapore using one shared, source-dated catalogue.',
   auth: wirelessSgxAuth,
   logoUrl: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22%230f766e%22/%3E%3Ctext x=%2232%22 y=%2242%22 text-anchor=%22middle%22 font-size=%2230%22 fill=%22white%22%3EW%3C/text%3E%3C/svg%3E',
   authors: ['wireless-sgx-explorer'], actions: [nearest, searchHotspots, searchVenues, getHotspot, datasetInfo], triggers: [],

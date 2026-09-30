@@ -1,5 +1,5 @@
 {
-  "name": "Wireless@SGX Explorer | n8n portfolio",
+  "name": "Hotspot Explorer for Wireless@SGX | n8n portfolio",
   "nodes": [
     {
       "parameters": {},
@@ -83,7 +83,7 @@
     },
     {
       "parameters": {
-        "content": "## Wireless@SGX Explorer · n8n portfolio\nSet your Explorer API URL in Configure API and examples. If protected, select Header Auth credentials on Shared Explorer API (Authorization: Bearer YOUR_TOKEN). Never put secrets in this export.\n\nFive read-only operations demonstrate the shared catalogue. This manual-only template has no public webhook. Distances are straight-line and coverage/availability are unverified. See docs/portfolio.md for the production MCP/tool pattern.",
+        "content": "## Hotspot Explorer for Wireless@SGX · n8n portfolio\nSet your Explorer API URL in Configure API and examples. If protected, select Header Auth credentials on Shared Explorer API (Authorization: Bearer YOUR_TOKEN). Never put secrets in this export.\n\nFive read-only operations demonstrate the shared catalogue. This manual-only template has no public webhook. Distances are straight-line and coverage/availability are unverified. See docs/portfolio.md for the production MCP/tool pattern.",
         "height": 270,
         "width": 680
       },

@@ -15,7 +15,7 @@ const definitions = {
   dataset_info: { description:'Get catalogue version, counts, source dates, mapping completeness and limitations. This service does not retrieve live Google Maps data or Wi-Fi status.',inputSchema:z.object({}).strict()}
 };
 export function createMcpServer() {
- const server=new McpServer({name:'Wireless@SGX hotspots MCP',version:'0.2.0'}, {
+ const server=new McpServer({name:'Hotspot Explorer for Wireless@SGX',version:'0.2.0'}, {
    instructions:'Use returned tool results as the sole catalogue evidence. Call a tool before claiming an MCP answer. Report tool failures honestly; web results must be separately labelled and must not be added to the ranked catalogue results. Never invent coordinates, signal coverage, open status, seating or sockets. Always disclose incomplete geographic ranking and source dates.'
  });
  for(const [name,definition] of Object.entries(definitions)) {

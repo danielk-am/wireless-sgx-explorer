@@ -1,4 +1,4 @@
-# Wireless@SGX Explorer
+# Hotspot Explorer for Wireless@SGX
 
 This project is built for Daniel Kam's connectivity explorer and automation portfolio. Keep source provenance and incomplete coordinate coverage explicit. Do not invent Wi-Fi coverage, operational status, seating or power availability. Preserve March 2026 catalogue membership; historical-only locations cannot enter by coordinate enrichment. All adapters must call the shared lookup engine/API, not carry different datasets. Public lookup is read-only. Never commit secrets or personal service configuration.
 

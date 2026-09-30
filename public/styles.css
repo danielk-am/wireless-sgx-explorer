@@ -2,7 +2,7 @@
 .masthead,main,footer{max-width:1320px;margin:auto;padding-left:48px;padding-right:48px}
 .masthead{height:92px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:7px;text-decoration:none;font-weight:700;letter-spacing:-.4px;font-size:18px}
-.brand>span:last-child{font-weight:400;color:var(--color-muted)}
+.brand-name{display:flex;flex-direction:column;gap:3px;line-height:1.15}.brand-name strong{font-weight:700}.brand-name small{font-size:12px;font-weight:400;color:var(--color-muted);letter-spacing:0}
 .brand-mark{display:block;width:42px;height:42px;object-fit:contain;flex-shrink:0;margin-right:5px}
 .about-link{font-size:13px;text-decoration:none}
 .intro{display:flex;justify-content:space-between;padding:56px 0 30px;gap:36px}
