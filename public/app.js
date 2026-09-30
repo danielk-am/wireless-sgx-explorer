@@ -1,3 +1,4 @@
+const colorToken = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 import { hasCoordinates, searchVenues, distanceLabel, safeGoogleUrl } from './helpers.js';
 const $ = id => document.getElementById(id);
 const state = { venues: [], shown: [], limit: 12, map: null, markers: null, origin: null, request: 0, loaded: false };
@@ -54,7 +55,7 @@ async function nearest(latitude, longitude, label) {
     $('result-note').textContent = `Approximate straight-line distance, not walking distance or signal range. Ranking covers ${number(located)} located venues; ${number(state.venues.length - located)} unlocated venues are excluded.`;
     status(`Found ${data.results.length} nearby listed venues. Check floor details and access before travelling.`);
     if (state.map) {
-      if (state.origin) state.origin.remove(); state.origin = window.L.circleMarker([latitude, longitude], { bubblingMouseEvents: false, radius: 9, color: '#dd643e', fillColor: '#dd643e', fillOpacity: .85, weight: 3 }).addTo(state.map).bindTooltip('Your selected starting point');
+      if (state.origin) state.origin.remove(); state.origin = window.L.circleMarker([latitude, longitude], { bubblingMouseEvents: false, radius: 9, color: colorToken('--color-origin'), fillColor: colorToken('--color-origin'), fillOpacity: .85, weight: 3 }).addTo(state.map).bindTooltip('Your selected starting point');
       state.map.setView([latitude, longitude], 15);
     }
     render();
@@ -64,7 +65,7 @@ async function nearest(latitude, longitude, label) {
 function renderMarkers() {
   state.markers.clearLayers();
   for (const venue of state.shown.filter(hasCoordinates)) {
-    const marker = window.L.circleMarker([venue.latitude, venue.longitude], { bubblingMouseEvents: false, radius: 6, weight: 2, color: '#fffefa', fillColor: '#123d37', fillOpacity: .92 }).addTo(state.markers);
+    const marker = window.L.circleMarker([venue.latitude, venue.longitude], { bubblingMouseEvents: false, radius: 6, weight: 2, color: colorToken('--color-marker-outline'), fillColor: colorToken('--color-marker'), fillOpacity: .92 }).addTo(state.markers);
     const popup = el('div'); popup.append(el('strong', venue.name), el('div', `${venue.address} · ${venue.listed_hotspot_count} listed hotspots`));
     const button = el('button', 'View venue details'); button.type = 'button'; button.addEventListener('click', () => {
       const index = state.shown.findIndex(item => item.venue_id === venue.venue_id); state.limit = Math.max(state.limit, index + 1); render(); const target = $(`venue-${venue.venue_id}`); target.querySelector('details').open = true; target.scrollIntoView({ behavior: 'instant', block: 'nearest' }); target.querySelector('summary').focus();
