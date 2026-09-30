@@ -1,0 +1,37 @@
+{
+  "name": "@wireless-sgx/piece-wireless-sgx",
+  "version": "0.1.0",
+  "description": "Wireless@SGX Explorer: nearby connectivity venues from the shared catalogue API",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "dependency-audit.json",
+    "production-dependency-audit.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test test/*.test.cjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "22.19.15",
+    "@activepieces/pieces-framework": "0.32.0"
+  },
+  "peerDependencies": {
+    "@activepieces/pieces-framework": ">=0.32.0 <0.41.0"
+  },
+  "peerDependenciesMeta": {
+    "@activepieces/pieces-framework": {
+      "optional": true
+    }
+  },
+  "overrides": {
+    "ai": "6.0.296",
+    "nanoid": "3.3.19",
+    "deepmerge-ts": "8.0.2"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "wireless-sgx-explorer",
+  "version": "0.2.0",
+  "description": "Source-backed Singapore Wireless@SGX hotspot explorer, MCP server and automation integrations",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/http.js",
+    "start:stdio": "node src/stdio.js",
+    "test": "node --test test/*.test.js",
+    "validate:data": "node scripts/validate-data.js",
+    "verify": "npm run validate:data && npm test",
+    "test:synthetic": "node --test test/synthetic.test.js test/web.test.js test/integrations.test.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.31.0",
+    "express": "5.2.1",
+    "leaflet": "1.9.4",
+    "zod": "4.6.5"
+  }
+}

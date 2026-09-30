@@ -1,0 +1,10 @@
+{
+  "url": "https://www.imda.gov.sg/assets/9a4b742c-3a3f-4ce7-ae22-b5bb421fcdfb.pdf",
+  "date": "2026-03",
+  "sha256": "0b40c373a802651269501fe80ee547160e4b26eb04fc63550edf414dd492be25",
+  "retrieved_at": "2026-09-30",
+  "coordinate_dataset_url": "https://data.gov.sg/datasets/d_d8644084f8b54f851a1acbb2f04d5089/view",
+  "coordinate_dataset_date": "2024-06-06",
+  "refresh_mode": "versioned_snapshot",
+  "catalogue_sha256": "06adeb23da6ad21c5ce0c69137612cfcaec918967b1951e371efe1ebd1c2d00b"
+}

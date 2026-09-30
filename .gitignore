@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+artifacts/
+# Supplied IMDA PDF-derived catalogue: do not publish without confirmed permission.
+data/hotspots.json
+*.pdf
+*.geojson
+integrations/activepieces/dist/
+integrations/activepieces/*.tgz
+
+.venv/
+__pycache__/

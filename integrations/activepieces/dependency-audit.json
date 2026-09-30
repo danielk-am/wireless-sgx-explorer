@@ -1,0 +1,128 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@activepieces/pieces-framework": {
+      "name": "@activepieces/pieces-framework",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "@activepieces/shared"
+      ],
+      "effects": [],
+      "range": ">=0.29.1",
+      "nodes": [
+        "node_modules/@activepieces/pieces-framework"
+      ],
+      "fixAvailable": {
+        "name": "@activepieces/pieces-framework",
+        "version": "0.29.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@activepieces/shared": {
+      "name": "@activepieces/shared",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "expr-eval"
+      ],
+      "effects": [
+        "@activepieces/pieces-framework"
+      ],
+      "range": ">=0.80.1",
+      "nodes": [
+        "node_modules/@activepieces/shared"
+      ],
+      "fixAvailable": {
+        "name": "@activepieces/pieces-framework",
+        "version": "0.29.0",
+        "isSemVerMajor": true
+      }
+    },
+    "expr-eval": {
+      "name": "expr-eval",
+      "severity": "critical",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1109807,
+          "name": "expr-eval",
+          "dependency": "expr-eval",
+          "title": "expr-eval vulnerable to Prototype Pollution",
+          "url": "https://github.com/advisories/GHSA-8gw3-rxh4-v6jx",
+          "severity": "high",
+          "cwe": [
+            "CWE-1321"
+          ],
+          "cvss": {
+            "score": 7.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+          },
+          "range": "<=2.0.2"
+        },
+        {
+          "source": 1111287,
+          "name": "expr-eval",
+          "dependency": "expr-eval",
+          "title": "expr-eval does not restrict functions passed to the evaluate function",
+          "url": "https://github.com/advisories/GHSA-jc85-fpwf-qm7x",
+          "severity": "high",
+          "cwe": [
+            "CWE-94"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<=2.0.2"
+        },
+        {
+          "source": 1239183,
+          "name": "expr-eval",
+          "dependency": "expr-eval",
+          "title": "expr-eval vulnerable to Code Execution",
+          "url": "https://github.com/advisories/GHSA-q9v2-7m5w-4693",
+          "severity": "critical",
+          "cwe": [
+            "CWE-94"
+          ],
+          "cvss": {
+            "score": 9.8,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "range": "<=2.0.2"
+        }
+      ],
+      "effects": [
+        "@activepieces/shared"
+      ],
+      "range": "*",
+      "nodes": [
+        "node_modules/expr-eval"
+      ],
+      "fixAvailable": {
+        "name": "@activepieces/pieces-framework",
+        "version": "0.29.0",
+        "isSemVerMajor": true
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 2,
+      "critical": 1,
+      "total": 3
+    },
+    "dependencies": {
+      "prod": 1,
+      "dev": 35,
+      "optional": 0,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 35
+    }
+  }
+}

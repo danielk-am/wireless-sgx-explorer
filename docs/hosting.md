@@ -1,0 +1,39 @@
+# Self-hosting and client setup
+
+## Local service
+
+`npm ci --ignore-scripts && npm start` binds loopback port 3000. Set `PORT` to change it. Keep catalogue and metadata together and restart after a reviewed update. The server is stateless; rollback is restoring the previous code/lockfile and paired data files, then restarting.
+
+## Docker
+
+`docker compose up --build -d` builds the pinned Node 24 image and binds host port 3000 to loopback only. The authorised catalogue and matching metadata are mounted read-only. Missing files fail instead of creating directories. Container filesystems are read-only and Linux capabilities dropped. `docker compose down` stops the service without deleting source data.
+
+The image digest was resolved from Docker Hub on 30 September 2026. A Docker engine was not available in the build environment, so container startup has not been executed here; the Node service itself was tested directly. Verify health and MCP calls after deploying a container.
+
+## Public endpoint
+
+Place an HTTPS reverse proxy in front of the loopback port. Set `ALLOWED_HOSTS` to the exact public hostname **plus** `localhost,127.0.0.1,[::1]` for health checks. Preserve Host and forward requests to the service; do not forward an arbitrary client-controlled destination. Origin checks permit same-host browser requests, reject other origins unless explicitly listed, and allow non-browser clients without Origin.
+
+The bundled rate limit allows 120 API/MCP requests per minute per socket IP. Behind a reverse proxy this becomes a shared backend budget; enforce per-client rate limits at the proxy and tune the application intentionally for expected volume. Do not blindly trust spoofable X-Forwarded-For. Body size is capped at 16 KB; normal lookup arguments are far smaller. No request payload or location logging is implemented; ensure your proxy also avoids retaining precise locations or authorization headers.
+
+Public routes contain only the approved public catalogue: `/`, `/api/venues`, `/api/dataset`, `/api/lookup`. **MCP_TOKEN does not protect these routes.** Do not mount private datasets here. If a private deployment is needed, apply authentication to the entire site/API at the reverse proxy and adapt the client accordingly.
+
+`MCP_TOKEN` is an optional static bearer token for MCP clients that support a configured Authorization header. This is not OAuth. Never embed it in a browser page, URL, workflow JSON or public repository. For a public read-only ChatGPT connector, use a client-supported no-auth connection if available; for OAuth, deploy a compatible OAuth authorization layer or keep the n8n OAuth endpoint. Do not describe this server as offering OAuth.
+
+## ChatGPT acceptance
+
+ChatGPT custom MCP connections need a reachable remote server; local stdio is for clients that launch processes. Configure the HTTPS `/mcp` URL in a supported ChatGPT custom-app surface and its supported authentication mode. Account/workspace availability varies; follow the current [OpenAI instructions](https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt).
+
+A successful installation requires evidence from the real client:
+
+1. Discover `dataset_info` and the four lookup tools.
+2. Call `dataset_info` and read back source dates/counts.
+3. Call `nearest_hotspots` with `query: "319260"`; compare to the map/API.
+4. Call with `query: "188979"`; preserve `ORIGIN_NOT_RESOLVED`.
+5. Confirm the activity shows actual tool names, inputs and results. Reading mcp.json or searching the web does not count.
+
+This build has SDK-level protocol evidence, not a new ChatGPT installation or public deployment.
+
+## Source updates and public data
+
+Review the rights and source age before serving data publicly. Keep source membership separate from coordinate enrichment, preserve match provenance, and reject out-of-bounds/ambiguous positions. Importer output goes to ignored files. Refreshes are explicit; no hidden timer, background location tracking or automatic remote upload exists.

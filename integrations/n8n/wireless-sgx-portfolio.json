@@ -1,0 +1,154 @@
+{
+  "name": "Wireless@SGX Explorer | n8n portfolio",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual",
+      "name": "Run portfolio demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Change this to your HTTPS Explorer origin. Do not place tokens in code.\nconst baseUrl = 'https://explorer.example.invalid';\nreturn [\n  {operation: 'dataset_info', arguments: {}},\n  {operation: 'search_venues', arguments: {query: 'Albert Centre', limit: 5}},\n  {operation: 'search_hotspots', arguments: {query: 'Albert Centre', limit: 5}},\n  {operation: 'nearest_hotspots', arguments: {latitude: 1.3008, longitude: 103.8528, limit: 5}},\n  {operation: 'get_hotspot', arguments: {hotspot_id: 'wsgx-0001'}},\n].map(request => ({json: {baseUrl, ...request}}));"
+      },
+      "id": "config",
+      "name": "Configure API and examples",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const allowed = ['dataset_info','search_venues','search_hotspots','nearest_hotspots','get_hotspot'];\nreturn $input.all().map(({json: input}) => {\n  if (typeof input.baseUrl !== 'string' || !/^https:\\/\\/[A-Za-z0-9.-]+(?::[0-9]+)?(?:\\/[A-Za-z0-9_/-]*)?$/.test(input.baseUrl)) throw new Error('Set a valid HTTPS Explorer base URL without credentials or query parameters.');\n  if (!allowed.includes(input.operation)) throw new Error('Unsupported lookup operation.');\n  if (!input.arguments || typeof input.arguments !== 'object' || Array.isArray(input.arguments)) throw new Error('Arguments must be an object.');\n  return {json:{url:input.baseUrl.replace(/\\/$/,'') + '/api/lookup', request:{operation:input.operation,arguments:input.arguments}}};\n});"
+      },
+      "id": "prepare",
+      "name": "Validate request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.request) }}",
+        "options": {
+          "timeout": 15000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "lookup",
+      "name": "Shared Explorer API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(({json}) => {\n  if (!json || typeof json.ok !== 'boolean') throw new Error('Invalid Explorer API response.');\n  return {json}; // Preserve ok:false and all provenance/coordinate limitations.\n});"
+      },
+      "id": "check",
+      "name": "Keep evidence and errors",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Wireless@SGX Explorer · n8n portfolio\nSet your Explorer API URL in Configure API and examples. If protected, select Header Auth credentials on Shared Explorer API (Authorization: Bearer YOUR_TOKEN). Never put secrets in this export.\n\nFive read-only operations demonstrate the shared catalogue. This manual-only template has no public webhook. Distances are straight-line and coverage/availability are unverified. See docs/portfolio.md for the production MCP/tool pattern.",
+        "height": 270,
+        "width": 680
+      },
+      "id": "notes",
+      "name": "Setup and evidence",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -340
+      ]
+    }
+  ],
+  "connections": {
+    "Run portfolio demo": {
+      "main": [
+        [
+          {
+            "node": "Configure API and examples",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configure API and examples": {
+      "main": [
+        [
+          {
+            "node": "Validate request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate request": {
+      "main": [
+        [
+          {
+            "node": "Shared Explorer API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shared Explorer API": {
+      "main": [
+        [
+          {
+            "node": "Keep evidence and errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  },
+  "pinData": {}
+}

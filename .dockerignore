@@ -1,0 +1,10 @@
+node_modules
+.git
+.env
+.env.*
+artifacts
+integrations
+test
+*.pdf
+*.geojson
+data/hotspots.json
