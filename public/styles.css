@@ -122,3 +122,5 @@
 .catalogue-source a{font-weight:600}
 
 #origin-choices:empty{display:none}#origin-choices{display:grid;gap:8px;margin-top:14px}#origin-choices button{text-align:left;min-height:46px;overflow-wrap:anywhere}
+
+#google-search{margin-bottom:18px}#google-input gmp-place-autocomplete{display:block;width:100%;color-scheme:light}

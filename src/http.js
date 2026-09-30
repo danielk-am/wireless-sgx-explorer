@@ -11,7 +11,8 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const jsonError=(code,message)=>({ok:false,error:{code,message}});
 const equal=(a,b)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);};
 
-export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowedOrigins=[],mcpToken='',rateLimit=120}={}) {
+export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowedOrigins=[],mcpToken='',mapsBrowserKey=process.env.GOOGLE_MAPS_BROWSER_KEY||'',rateLimit=120}={}) {
+ const googleCsp = "default-src 'self'; script-src 'self' 'unsafe-eval' https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.google.com data: blob:; font-src 'self' https://fonts.gstatic.com; frame-src https://*.google.com; worker-src blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
  const app=express();app.disable('x-powered-by');
  app.use(hostHeaderValidation(allowedHosts));
  app.use((req,res,next)=>{
@@ -20,7 +21,7 @@ export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowe
    'X-Content-Type-Options':'nosniff',
    'Referrer-Policy':'strict-origin-when-cross-origin',
    'Permissions-Policy':'geolocation=(self), camera=(), microphone=()',
-   'Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+   'Content-Security-Policy':mapsBrowserKey ? googleCsp : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
   });
   if(req.headers.origin) {
    let same=false;try{const origin=new URL(req.headers.origin);same=['http:','https:'].includes(origin.protocol)&&origin.host===req.headers.host;}catch{}
@@ -40,6 +41,7 @@ export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowe
  });
  app.use(express.json({limit:'16kb',strict:true}));
  app.get('/healthz',(_req,res)=>res.json({ok:true,service:'wireless-sgx-explorer',version:'0.2.0'}));
+ app.get('/api/config',(_req,res)=>res.json({googleMapsBrowserKey:mapsBrowserKey}));
  app.get('/api/venues',(_req,res)=>res.json({metadata:datasetInfo(),venues:venues()}));
  app.get('/api/dataset',(_req,res)=>res.json(datasetInfo()));
  app.post('/api/lookup',(req,res)=>{

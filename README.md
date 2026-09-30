@@ -105,3 +105,7 @@ cd integrations/activepieces && npm ci --ignore-scripts && npm test
 To enable GitHub Actions, copy `ci/github-actions.yml` to `.github/workflows/test.yml` using a GitHub connection with workflow-write permission. Until then, tests are locally verified; remote CI is not enabled.
 
 [Verification evidence and remaining deployment checks](docs/verification.md). The current project tests actual SDK clients over both transports; a ChatGPT answer is not evidence of a tool call unless tool activity confirms it.
+
+### Optional Google place search
+
+[Configure Google Autocomplete and Google Maps](docs/google-maps.md) with a restricted `GOOGLE_MAPS_BROWSER_KEY` supplied through the runtime environment. Hotspots still come from data.gov.sg. Without a key, catalogue search and the existing optional map remain available.

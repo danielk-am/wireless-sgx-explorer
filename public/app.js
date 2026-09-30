@@ -1,7 +1,8 @@
 const colorToken = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 import { hasCoordinates, searchVenues, distanceLabel, safeGoogleUrl } from './helpers.js';
+import { attachAutocomplete, createGoogleMap } from './google-maps.js?v=google-1';
 const $ = id => document.getElementById(id);
-const state = { venues: [], shown: [], limit: 12, map: null, markers: null, origin: null, startingPoint: null, request: 0, loaded: false };
+const state = { venues: [], shown: [], limit: 12, map: null, markers: null, origin: null, startingPoint: null, request: 0, loaded: false, mapsKey: '', googleView: null };
 const number = value => value.toLocaleString('en-SG');
 async function requestJSON(url, options = {}) {
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 15000);
@@ -37,7 +38,7 @@ function render() {
   if (state.map) renderMarkers();
 }
 function browse(query = '') {
-  state.request++; busy(false); state.startingPoint = null; if (state.origin) { state.origin.remove(); state.origin = null; } $('origin-choices').replaceChildren(); state.shown = query.trim() ? searchVenues(state.venues, query) : state.venues;
+  state.request++; busy(false); state.startingPoint = null; state.googleView?.clearOrigin(); if (state.origin) { state.origin.remove(); state.origin = null; } $('origin-choices').replaceChildren(); state.shown = query.trim() ? searchVenues(state.venues, query) : state.venues;
   state.limit = 12; $('results-heading').textContent = query.trim() ? `Results for “${query.trim()}”` : 'Listed locations';
   $('result-note').textContent = 'Browsing all listed venues. Search a starting point or use your location to sort hotspots by distance.';
   status(query.trim() ? `${number(state.shown.length)} matching venues. This is a catalogue search, not a general address lookup.` : 'Browse the catalogue, or choose a starting point for a distance search.'); render();
@@ -80,7 +81,9 @@ async function nearest(latitude, longitude, label, query) {
   finally { if (request === state.request) busy(false); }
 }
 function showStartingPoint() {
-  if (!state.map || !state.startingPoint) return;
+  if (!state.startingPoint) return;
+  if (state.googleView) { state.googleView.showOrigin(state.startingPoint); return; }
+  if (!state.map) return;
   const { latitude, longitude } = state.startingPoint;
   if (state.origin) state.origin.remove();
   state.origin = window.L.circleMarker([latitude, longitude], { bubblingMouseEvents: false, radius: 9, color: colorToken('--color-origin'), fillColor: colorToken('--color-origin'), fillOpacity: .85, weight: 3 }).addTo(state.map).bindTooltip('Your selected starting point');
@@ -92,18 +95,28 @@ function searchNearby() {
   nearest(undefined, undefined, query, query);
 }
 function renderMarkers() {
+  if (state.googleView) { state.googleView.render(state.shown, venuePopup); return; }
   state.markers.clearLayers();
   for (const venue of state.shown.filter(hasCoordinates)) {
     const marker = window.L.circleMarker([venue.latitude, venue.longitude], { bubblingMouseEvents: false, radius: 6, weight: 2, color: colorToken('--color-marker-outline'), fillColor: colorToken('--color-marker'), fillOpacity: .92 }).addTo(state.markers);
+    marker.bindPopup(venuePopup(venue));
+  }
+}
+function venuePopup(venue) {
     const popup = el('div'); popup.append(el('strong', venue.name), el('div', `${venue.address} · ${venue.listed_hotspot_count} listed hotspots`));
     const button = el('button', 'View venue details'); button.type = 'button'; button.addEventListener('click', () => {
       const index = state.shown.findIndex(item => item.venue_id === venue.venue_id); state.limit = Math.max(state.limit, index + 1); render(); const target = $(`venue-${venue.venue_id}`); target.querySelector('details').open = true; target.scrollIntoView({ behavior: 'instant', block: 'nearest' }); target.querySelector('summary').focus();
-    }); popup.append(button); marker.bindPopup(popup);
-  }
+    }); popup.append(button); return popup;
 }
 async function showMap() {
+  if (!state.loaded) { status('Please wait for the catalogue to load, or use Retry catalogue.'); return; }
   const button = $('show-map'); button.disabled = true; button.textContent = 'Loading map…';
   try {
+    if (state.mapsKey) {
+      state.googleView = await createGoogleMap(state.mapsKey, $('map'), (lat, lng) => nearest(lat, lng, 'selected map point'));
+      state.map = state.googleView;
+      renderMarkers(); showStartingPoint(); return;
+    }
     if (!window.L) await new Promise((resolve, reject) => { const script = document.createElement('script'); script.src = '/vendor/leaflet/leaflet.js'; script.onload = resolve; script.onerror = () => reject(new Error('Map library unavailable')); document.head.append(script); });
     $('map').replaceChildren(); state.map = window.L.map('map', { scrollWheelZoom: false }).setView([1.3521, 103.8198], 11);
     const tiles = window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(state.map);
@@ -114,6 +127,17 @@ async function showMap() {
 }
 async function load() {
   try {
+    if (!state.mapsKey) {
+      const { response: configResponse, data: config } = await requestJSON('/api/config');
+      if (!configResponse.ok) throw new Error('Configuration unavailable');
+      state.mapsKey = config.googleMapsBrowserKey || '';
+      if (state.mapsKey) {
+        $('google-search').hidden = false;
+        $('map-privacy').replaceChildren(document.createTextNode('Google place search and maps receive your IP address, typed searches and viewed area. A selected starting point is sent to this service for distance lookup and is not stored. '));
+        const privacy = el('a', 'Privacy and terms'); privacy.href = '/privacy.html'; $('map-privacy').append(privacy);
+        $('google-enable').addEventListener('click', enableGoogleSearch);
+      }
+    }
     const { response, data } = await requestJSON('/api/venues'); if (!response.ok) throw new Error('Catalogue unavailable'); if (!Array.isArray(data.venues)) throw new Error('Unexpected catalogue response');
     state.venues = data.venues; state.loaded = true;
     if (data.metadata?.catalogue_date && data.metadata?.coordinate_dataset_date) {
@@ -131,6 +155,24 @@ async function load() {
     browse();
   } catch { status('The catalogue could not load. Check your connection and try again.'); const retry = el('button', 'Retry catalogue', 'secondary'); retry.addEventListener('click', load); $('results').replaceChildren(retry); }
 }
+async function enableGoogleSearch() {
+  if (!state.loaded) { status('Please wait for the catalogue to load, or use Retry catalogue.'); return; }
+  $('google-enable').disabled = true;
+  try {
+    await attachAutocomplete(state.mapsKey, $('google-input'), (origin, request) => {
+      if (request !== state.request) return;
+      nearest(origin.latitude, origin.longitude, origin.label);
+    }, (error, request) => {
+      if (request !== undefined && request !== state.request) return;
+      busy(false); status(error.message);
+    }, () => { const request = ++state.request; busy(true); status('Finding the selected place…'); return request; });
+    $('google-enable').hidden = true;
+    status('Select a Google suggestion to find nearby hotspots automatically.');
+  } catch (error) { status(error.message); $('google-enable').disabled = false; }
+}
+window.addEventListener('wireless-google-error', () => {
+  ++state.request; busy(false); status('Google search or map could not authenticate. Catalogue search, coordinates and Use my location remain available.');
+});
 $('search-form').addEventListener('submit', event => { event.preventDefault(); if (!state.loaded) return status('Please load the catalogue first using Retry catalogue.'); searchNearby(); });
 $('reset').addEventListener('click', () => { if (!state.loaded) return load(); $('query').value = ''; browse(); });
 $('more').addEventListener('click', () => { state.limit += 12; render(); });
