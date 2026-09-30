@@ -2,7 +2,7 @@
 
 Set `GOOGLE_MAPS_BROWSER_KEY` in the app's runtime environment (Coolify or Compose) and redeploy. Blank means the existing catalogue search and optional OpenStreetMap remain active. Configured means Google place search and Google Maps; Google-selected starting points are never shown on an OpenStreetMap map.
 
-Enable **Maps JavaScript API** and **Places API (New)** in the same billing-enabled Google Cloud project. Restrict the browser key to those APIs and HTTP referrers `https://wireless.danielk.am/*`. Use a separate development key restricted to localhost for local testing. Set API quotas and billing alerts appropriate to the owner's budget. Do not paste keys into the repository or chat.
+Enable **Maps JavaScript API** and **Places API (New)** in the same billing-enabled Google Cloud project. Restrict the browser key to those APIs and HTTP referrers `https://wifiexplorer.danielk.am/*`. Use a separate development key restricted to localhost for local testing. Set API quotas and billing alerts appropriate to the owner's budget. Do not paste keys into the repository or chat.
 
 A browser key is intentionally public: the app exposes ONLY this designated key through `/api/config` with no-store caching. It is not a server secret. Never use an unrestricted server key or place MCP_TOKEN in this setting. Other server environment values are not exposed.
 

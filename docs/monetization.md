@@ -1,4 +1,4 @@
-# Advertising on wireless.danielk.am
+# Advertising on wifiexplorer.danielk.am
 
 Prepared 30 September 2026. No ad account, paid placement, affiliate contract or tracking script is enabled by this plan.
 

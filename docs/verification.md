@@ -2,12 +2,12 @@
 
 ## Public launch verified
 
-The historical open-data edition is live at https://wireless.danielk.am/ with MCP at https://wireless.danielk.am/mcp (30 September 2026). Deployed application commit: `69b1d4304486f53849dae93c30e61a5d9c5860a1`.
+The historical open-data edition is live at https://wifiexplorer.danielk.am/ with MCP at https://wifiexplorer.danielk.am/mcp (30 September 2026). The former `wireless.danielk.am` hostname redirects to this canonical address.
 
 - 29 Node tests passed, including the original local-PDF suite and three open-catalogue cases.
 - Public image built and container reported healthy on the Singapore host. Health check uses `node /app/src/healthcheck.js`; no curl/wget dependency. Runs as UID 1000 and contains only the two public catalogue files in `/app/data`.
 - HTTPS verification succeeded through Cloudflare with strict origin certificate checks preserved.
-- `node scripts/smoke-public.mjs https://wireless.danielk.am` passed: 1,800 records / 1,306 venues; five real MCP tools; metadata and nearest-result agreement across public map API, REST and MCP; hostile Origin rejected with HTTP 403.
+- `node scripts/smoke-public.mjs https://wifiexplorer.danielk.am` passed: 1,800 records / 1,306 venues; five real MCP tools; metadata and nearest-result agreement across public map API, REST and MCP; hostile Origin rejected with HTTP 403.
 - Live browser confirmed 1,306 pins, nine loaded map tiles, loaded logo and zero browser errors. Local open-data browser showed 1,306 pins, visible June 2024 dataset / March 2020 record dates, attribution and licence links, and no horizontal overflow at a 390px phone viewport. No browser errors were recorded.
 - Ads are not enabled. The existing n8n hotspot service and older My Map have not been switched to this historical release. A ChatGPT client migration/installation has not been performed.
 

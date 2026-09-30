@@ -12,12 +12,17 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const jsonError=(code,message)=>({ok:false,error:{code,message}});
 const equal=(a,b)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);};
 
-export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowedOrigins=[],mcpToken='',mapsBrowserKey=process.env.GOOGLE_MAPS_BROWSER_KEY||'',adsenseClient=process.env.ADSENSE_CLIENT||'',adsenseSlot=process.env.ADSENSE_SLOT||'',rateLimit=120}={}) {
+export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowedOrigins=[],canonicalHost='',redirectHosts=[],mcpToken='',mapsBrowserKey=process.env.GOOGLE_MAPS_BROWSER_KEY||'',adsenseClient=process.env.ADSENSE_CLIENT||'',adsenseSlot=process.env.ADSENSE_SLOT||'',rateLimit=120}={}) {
  const adsEnabled=/^ca-pub-[0-9]{16}$/.test(adsenseClient)&&/^[0-9]{10}$/.test(adsenseSlot);
  const indexHtml=readFileSync(resolve(root,'public/index.html'),'utf8');
  const googleCsp = "default-src 'self'; script-src 'self' 'unsafe-eval' https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.google.com data: blob:; font-src 'self' https://fonts.gstatic.com; frame-src https://*.google.com; worker-src blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
  const app=express();app.disable('x-powered-by');
  app.use(hostHeaderValidation(allowedHosts));
+ app.use((req,res,next)=>{
+  const requestHost=(req.headers.host||'').split(':')[0].toLowerCase();
+  if(canonicalHost&&redirectHosts.includes(requestHost))return res.redirect(308,`https://${canonicalHost}${req.originalUrl}`);
+  next();
+ });
  app.use((req,res,next)=>{
   res.set({
    'X-Request-Id':randomUUID(),
@@ -94,7 +99,7 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).hr
  if(!Number.isInteger(port)||port<1||port>65535)throw new Error('PORT must be 1–65535');
  const allowedHosts=(process.env.ALLOWED_HOSTS||'localhost,127.0.0.1,[::1]').split(',').map(s=>s.trim()).filter(Boolean);
  if(!['127.0.0.1','localhost','::1'].includes(host)&&!process.env.ALLOWED_HOSTS)throw new Error('Set ALLOWED_HOSTS explicitly when binding beyond loopback');
- const app=createApp({allowedHosts,allowedOrigins:(process.env.ALLOWED_ORIGINS||'').split(',').filter(Boolean),mcpToken:process.env.MCP_TOKEN||''});
+ const app=createApp({allowedHosts,allowedOrigins:(process.env.ALLOWED_ORIGINS||'').split(',').filter(Boolean),canonicalHost:process.env.CANONICAL_HOST||'',redirectHosts:(process.env.REDIRECT_HOSTS||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean),mcpToken:process.env.MCP_TOKEN||''});
  const server=app.listen(port,host,()=>console.error(`Wi-Fi Explorer for Wireless@SGX listening on ${host}:${port}`));
  server.requestTimeout=30000;server.headersTimeout=15000;
  for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>{server.close(()=>process.exit(0));setTimeout(()=>{server.closeAllConnections();process.exit(0);},5000).unref();});

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { bannerSettings, createBannerLink, removeFailedBannerArtwork, safeLink } from '../public/banners.js';
-const origin = 'https://wireless.danielk.am';
+const origin = 'https://wifiexplorer.danielk.am';
 const sample = { state: 'available', title: 'Ad space', url: '/advertise.html' };
 test('banner links reject executable and non-web schemes', () => {
   for (const url of ['javascript:alert(1)', 'data:text/html,test', 'http://advertiser.example', '', null]) assert.equal(safeLink(url, origin), null);

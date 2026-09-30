@@ -84,3 +84,13 @@ test('bounded rate limit returns retry guidance',async()=>{
  try{await fetch(url+'/api/venues');await fetch(url+'/api/venues');const res=await fetch(url+'/api/venues');assert.equal(res.status,429);assert(res.headers.get('retry-after'));}
  finally{server.closeAllConnections();await new Promise(r=>server.close(r));}
 });
+
+test('legacy public hostname redirects permanently to the canonical hostname',async()=>{
+ const {server,url}=await serve({allowedHosts:['wireless.danielk.am','wifiexplorer.danielk.am'],canonicalHost:'wifiexplorer.danielk.am',redirectHosts:['wireless.danielk.am']});
+ try {
+  const redirected=await new Promise((resolve,reject)=>{const req=request(url+'/mcp?source=legacy',{method:'POST',headers:{host:'wireless.danielk.am'}},res=>{res.resume();resolve({status:res.statusCode,location:res.headers.location});});req.on('error',reject);req.end();});
+  assert.deepEqual(redirected,{status:308,location:'https://wifiexplorer.danielk.am/mcp?source=legacy'});
+  const canonical=await new Promise((resolve,reject)=>{const req=request(url+'/healthz',{headers:{host:'wifiexplorer.danielk.am'}},res=>{res.resume();resolve(res.statusCode);});req.on('error',reject);req.end();});
+  assert.equal(canonical,200);
+ } finally {server.closeAllConnections();await new Promise(r=>server.close(r));}
+});

@@ -32,7 +32,7 @@ A successful installation requires evidence from the real client:
 4. Call with `query: "188979"`; preserve `ORIGIN_NOT_RESOLVED`.
 5. Confirm the activity shows actual tool names, inputs and results. Reading mcp.json or searching the web does not count.
 
-The public open-data edition is deployed at https://wireless.danielk.am/mcp and has real SDK-client evidence. A new ChatGPT installation is not verified. See docs/verification.md.
+The public open-data edition is deployed at https://wifiexplorer.danielk.am/mcp and has real SDK-client evidence. A new ChatGPT installation is not verified. See docs/verification.md.
 
 ## Source updates and public data
 
@@ -40,12 +40,12 @@ Review the rights and source age before serving data publicly. Keep source membe
 
 ## Open-data public image
 
-`Dockerfile.public` packages only the separately licensed data.gov.sg snapshot: 1,800 records grouped into 1,306 venues. It does not package the March 2026 PDF catalogue. Build with `docker build -f Dockerfile.public -t wireless-sgx-explorer:public .`. Set `ALLOWED_HOSTS=wireless.danielk.am,localhost,127.0.0.1,[::1]` for the approved public hostname. The image selects both public files explicitly, avoiding any fallback to the local PDF data. The user approved this source and hostname on 30 September 2026. Current availability is unverified; dataset-page date is 6 June 2024 and embedded record timestamps are 18 March 2020. See `docs/data.md` for attribution.
+`Dockerfile.public` packages only the separately licensed data.gov.sg snapshot: 1,800 records grouped into 1,306 venues. It does not package the March 2026 PDF catalogue. Build with `docker build -f Dockerfile.public -t wireless-sgx-explorer:public .`. Set `ALLOWED_HOSTS=wifiexplorer.danielk.am,localhost,127.0.0.1,[::1]` for the canonical public hostname. The image selects both public files explicitly, avoiding any fallback to the local PDF data. The user approved this source and hostname on 30 September 2026. Current availability is unverified; dataset-page date is 6 June 2024 and embedded record timestamps are 18 March 2020. See `docs/data.md` for attribution.
 
 A separate public image keeps the original local/default catalogue and its regression tests intact. Rollback restores the preceding image; do not substitute the local March 2026 files into the public image. Deployment status and externally verified checks must be recorded separately from this build recipe.
 
 ## Live release — 30 September 2026
 
-Public site: https://wireless.danielk.am/; read-only MCP: https://wireless.danielk.am/mcp. Coolify manages the service in the danielk.am production project on its Singapore host; Cloudflare proxies the dedicated hostname. The WordPress main site is unchanged. Coolify uses command health check `node /app/src/healthcheck.js`, port 3000, interval 30s, timeout 5s, retries 3 and start period 15s. Application commit `69b1d4304486f53849dae93c30e61a5d9c5860a1` was deployed and verified. Rebuild the reviewed main revision to update; confirm public health plus `node scripts/smoke-public.mjs https://wireless.danielk.am` after each deployment.
+Public site: https://wifiexplorer.danielk.am/; read-only MCP: https://wifiexplorer.danielk.am/mcp. Coolify manages the service in the danielk.am production project on its Singapore host; Cloudflare proxies the dedicated hostname. The former `wireless.danielk.am` address redirects permanently to the canonical hostname. The WordPress main site is unchanged. Coolify uses command health check `node /app/src/healthcheck.js`, port 3000, interval 30s, timeout 5s, retries 3 and start period 15s. Rebuild the reviewed main revision to update; confirm public health plus `node scripts/smoke-public.mjs https://wifiexplorer.danielk.am` after each deployment.
 
 The initial curl-based platform health check failed because the slim image lacks curl/wget; the Node health check resolved it. The first certificate was issued by Traefik using HTTP challenge. Cloudflare strict TLS was not weakened. The deployment helper workflows were archived after use; no recurring deployment timer was added.

@@ -2,6 +2,8 @@
 
 A Singapore connectivity explorer for digital nomads, remote workers and curious wanderers. Find listed venues, read the floor details, and open walking directions. The same catalogue powers the mobile map, local/remote MCP server, n8n portfolio workflow and Activepieces integration.
 
+Public app: <https://wifiexplorer.danielk.am/> · Remote MCP: <https://wifiexplorer.danielk.am/mcp>
+
 **This is a source-backed location guide, not a live Wi-Fi monitor.** Listings do not establish public access, working signal, opening hours, seating or power availability. An independent project, not affiliated with IMDA or the operators.
 
 ## What is included
