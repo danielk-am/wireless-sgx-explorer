@@ -33,7 +33,7 @@ export async function loadBanners() {
     const config = await response.json();
     for (const slot of slots) {
       const settings = bannerSettings(config?.slots?.[slot.dataset.bannerSlot], location.origin);
-      if (!settings) continue;
+      if (!settings) { slot.hidden = true; continue; }
       const content = document.createElement('div');
       content.className = 'banner-copy';
       const label = document.createElement('p');
@@ -44,6 +44,7 @@ export async function loadBanners() {
       const link = document.createElement('a');
       link.className = 'banner-button'; link.href = settings.url; link.textContent = settings.button;
       link.rel = 'sponsored noopener noreferrer'; link.referrerPolicy = 'no-referrer';
+      slot.replaceChildren();
       if (settings.image) {
         const img = document.createElement('img');
         img.src = settings.image; img.alt = settings.imageAlt; img.className = 'banner-image';

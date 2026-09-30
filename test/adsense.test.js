@@ -35,3 +35,10 @@ test('blocked and unfilled ads preserve fallback; late fill restores ad visibili
  unit.dataset.adStatus='filled';observer();assert.ok(!section.classList.contains('ad-empty'));assert.ok(fallback.classList.contains('replaced-by-network-ad'));
  unit.dataset.adStatus='unfilled';observer();assert.ok(section.classList.contains('ad-empty'));assert.ok(!fallback.classList.contains('replaced-by-network-ad'));assert.equal(window.adsbygoogle.length,1);
 });
+test('ad placement is inside listings after the more button, with initial placeholder',async()=>{
+ const p=await page({adsenseClient:'ca-pub-1234567890123456',adsenseSlot:'1234567890'});
+ const button=p.text.indexOf('id="more"');const ad=p.text.indexOf('class="ad-placement"');const map=p.text.indexOf('<aside class="map-panel"');
+ assert.ok(button<ad&&ad<map,'ad must follow button within listings column');
+ assert.match(p.text,/class="ad-placeholder"/);
+ assert.match(p.text,/id="results" tabindex="0"/);
+});

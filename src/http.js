@@ -69,9 +69,9 @@ export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowe
  app.get(['/', '/index.html'],(_req,res,next)=>{
   if(!adsEnabled)return next();
   const nonce=randomBytes(24).toString('base64');
-  const ad=`<section class="network-ad" aria-label="Advertisement"><p class="banner-label">Advertisement</p><ins class="adsbygoogle" style="display:block" data-ad-client="${adsenseClient}" data-ad-slot="${adsenseSlot}" data-ad-format="auto" data-full-width-responsive="true"></ins></section>`;
+  const ad=`<section class="network-ad" aria-label="Advertisement"><p class="banner-label">Advertisement</p><ins class="adsbygoogle" style="display:block;width:100%;height:250px" data-ad-client="${adsenseClient}" data-ad-slot="${adsenseSlot}"></ins></section>`;
   const html=indexHtml.replace('<!-- ADSENSE_UNIT -->',ad)
-   .replace('</head>',`<link rel="stylesheet" href="/adsense.css?v=1"><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}"></script><script type="module" src="/adsense.js?v=1"></script></head>`)
+   .replace('</head>',`<link rel="stylesheet" href="/adsense.css?v=listings-1"><script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}"></script><script type="module" src="/adsense.js?v=1"></script></head>`)
    .replace(/<script\b/g,`<script nonce="${nonce}"`);
   res.set('Cache-Control','no-store');
   // Google's supported strict CSP; trusted scripts may load their dependencies.

@@ -1,4 +1,3 @@
-.network-ad { margin:32px 0; min-height:300px; padding:16px 0; width:100%; }
-.network-ad .banner-label { margin:0 0 12px; text-align:center; }
-.network-ad.ad-empty, .banner-slot.replaced-by-network-ad { display:none; }
-@media(min-width:901px) { .network-ad { min-height:150px; } }
+.network-ad{padding:16px 0;width:100%;min-width:0;background:var(--color-brand-soft);border-radius:14px}
+.network-ad .banner-label{margin:0 0 12px;text-align:center}
+.network-ad.ad-empty,.banner-slot.replaced-by-network-ad{display:none}

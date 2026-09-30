@@ -34,7 +34,7 @@ Two first-party enquiry placeholders are now configured in `public/banners.json`
 | Slot | Placement |
 | --- | --- |
 | `map-side` | Card below map information; shown only above 900px |
-| `explorer-bottom` | Banner below the explorer/results; mobile and desktop |
+| `explorer-bottom` | Card below the listings’ Show more button; mobile and desktop |
 
 For each slot, edit `title`, `description`, `button` and `url`. Set `state` to `available` for an enquiry placeholder, `sponsored` for a real advertiser (automatically labelled Sponsored), or `hidden` to remove it. A missing or invalid slot also stays hidden. Links support HTTPS or a local path. Do not include visitor location, search or route information in any advertising link.
 
@@ -54,10 +54,12 @@ For actual **Buy now**: first agree the placement, rate, duration and availabili
 
 ## Manual AdSense unit
 
-Set `ADSENSE_CLIENT` (ca-pub- plus 16 digits) and `ADSENSE_SLOT` (10 digits) in the runtime environment to enable one responsive ad below the explorer. Both are public identifiers; leave either blank to disable the integration. Do not commit account-specific values. Keep Auto ads disabled in AdSense to preserve manual placement.
+Set `ADSENSE_CLIENT` (ca-pub- plus 16 digits) and `ADSENSE_SLOT` (10 digits) in the runtime environment to enable one responsive ad below the listings’ Show more button. Both are public identifiers; leave either blank to disable the integration. Do not commit account-specific values. Keep Auto ads disabled in AdSense to preserve manual placement.
 
 The configured homepage is served with a fresh script nonce and `Cache-Control: no-store`. Its strict CSP follows Google’s nonce/strict-dynamic approach; HTTPS frames, images and connections are permitted for ad creatives and consent services. Other routes retain the existing CSP. Do not place a caching rule over HTML that reuses nonce responses. See https://support.google.com/adsense/answer/16283098.
 
 The network ad is labelled Advertisement, separate from search and directions. A filled unit replaces the bottom enquiry card; unfilled or blocked ads leave that enquiry available. AdSense requests happen only once per page load, not on every search. Do not click live ads during testing.
 
 Before activation, verify the root-domain ads.txt entry, site approval state and Google CMP configuration. Approval and actual ad delivery are external to this app; an empty placement before approval is expected. Runtime smoke tests cannot prove monetisation or regional consent behaviour.
+
+The listings show three cards initially and add three per Show more action. The reserved ad placement follows that button with a 48px separation and divider. Server-rendered placeholders reserve space before banner configuration arrives; network and enquiry content share the same reserved region. Desktop listing scrollbars become visible on hover or keyboard focus. These placements are candidates for measurement, not proven highest-CTR locations.

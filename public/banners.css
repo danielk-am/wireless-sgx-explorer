@@ -10,3 +10,12 @@
 .advertise-options{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px}.advertise-option{border:1px solid var(--color-border);border-radius:14px;padding:28px;scroll-margin-top:24px}.advertise-option:target{outline:3px solid var(--color-blue)}.advertise-option p{color:var(--color-muted);font-size:14px}.advertise-note{max-width:740px;font-size:14px;color:var(--color-muted);margin-bottom:40px}
 @media(max-width:900px){.banner-slot--side{display:none}.banner-slot--wide{gap:18px}.banner-image{width:120px;height:100px}}
 @media(max-width:650px){.banner-slot--wide{flex-direction:column;align-items:stretch;padding:22px;margin-top:28px;min-height:230px}.banner-copy h2{font-size:24px}.banner-image{width:100%;height:160px}.advertise-options{grid-template-columns:1fr;gap:16px}.advertise-intro{padding-top:32px}.advertise-option{padding:22px}}
+
+/* Reserve both advertising placements in the initial HTML, before configuration arrives. */
+.ad-placement{display:grid;grid-template-columns:minmax(0,1fr);min-height:340px;margin-top:48px;padding-top:24px;border-top:1px solid var(--color-border)}
+.ad-placement>.network-ad,.ad-placement>.banner-slot{grid-area:1/1;min-width:0;margin:0;min-height:316px}
+.ad-placement>.banner-slot{flex-direction:column;align-items:stretch;justify-content:center;gap:16px}
+.ad-placement .banner-image{width:100%;height:120px}
+.ad-placement:has(.network-ad:not(.ad-empty))>.banner-slot{visibility:hidden;pointer-events:none}
+.ad-placeholder{width:100%;text-align:center;color:var(--color-muted);font-size:13px}
+.banner-slot--side{min-height:316px}

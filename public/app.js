@@ -2,7 +2,7 @@ const colorToken = name => getComputedStyle(document.documentElement).getPropert
 import { hasCoordinates, searchVenues, distanceLabel, safeGoogleUrl } from './helpers.js';
 import { attachAutocomplete, createGoogleMap } from './google-maps.js?v=google-1';
 const $ = id => document.getElementById(id);
-const state = { venues: [], shown: [], limit: 12, map: null, markers: null, origin: null, startingPoint: null, request: 0, loaded: false, mapsKey: '', googleView: null };
+const state = { venues: [], shown: [], limit: 3, map: null, markers: null, origin: null, startingPoint: null, request: 0, loaded: false, mapsKey: '', googleView: null };
 const number = value => value.toLocaleString('en-SG');
 async function requestJSON(url, options = {}) {
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 15000);
@@ -34,12 +34,13 @@ function render() {
   const shown = state.shown.slice(0, state.limit); $('results').replaceChildren(...shown.map(card));
   if (!shown.length) $('results').append(el('div', 'No matching catalogue venues. Try a shorter name, street or postal code. For an unlisted starting point, use your location, enter coordinates or click the loaded map.', 'empty'));
   $('result-count').textContent = `${number(state.shown.length)} venues`;
+  $('results').classList.toggle('results-expanded', state.limit > 3);
   $('more').hidden = state.limit >= state.shown.length;
   if (state.map) renderMarkers();
 }
 function browse(query = '') {
   state.request++; busy(false); state.startingPoint = null; state.googleView?.clearOrigin(); if (state.origin) { state.origin.remove(); state.origin = null; } $('origin-choices').replaceChildren(); state.shown = query.trim() ? searchVenues(state.venues, query) : state.venues;
-  state.limit = 12; $('results-heading').textContent = query.trim() ? `Results for “${query.trim()}”` : 'Listed locations';
+  state.limit = 3; $('results-heading').textContent = query.trim() ? `Results for “${query.trim()}”` : 'Listed locations';
   $('result-note').textContent = 'Browsing all listed venues. Search a starting point or use your location to sort hotspots by distance.';
   status(query.trim() ? `${number(state.shown.length)} matching venues. This is a catalogue search, not a general address lookup.` : 'Browse the catalogue, or choose a starting point for a distance search.'); render();
 }
@@ -71,7 +72,7 @@ async function nearest(latitude, longitude, label, query) {
     if (!Array.isArray(data.results)) throw new Error('The lookup returned an unexpected response.');
     latitude = data.origin.latitude; longitude = data.origin.longitude;
     state.startingPoint = { latitude, longitude };
-    state.shown = data.results; state.limit = 12; $('results-heading').textContent = `Near ${label}`;
+    state.shown = data.results; state.limit = 3; $('results-heading').textContent = `Near ${label}`;
     const located = state.venues.filter(hasCoordinates).length;
     $('result-note').textContent = `Approximate straight-line distance, not walking distance or signal range. Ranking covers ${number(located)} located venues; ${number(state.venues.length - located)} unlocated venues are excluded.`;
     status(`Found ${data.results.length} nearby listed venues. Check floor details and access before travelling.`);
@@ -176,7 +177,7 @@ window.addEventListener('wireless-google-error', () => {
 });
 $('search-form').addEventListener('submit', event => { event.preventDefault(); if (!state.loaded) return status('Please load the catalogue first using Retry catalogue.'); searchNearby(); });
 $('reset').addEventListener('click', () => { if (!state.loaded) return load(); $('query').value = ''; browse(); });
-$('more').addEventListener('click', () => { state.limit += 12; render(); });
+$('more').addEventListener('click', () => { state.limit += 3; render(); });
 $('show-map').addEventListener('click', showMap);
 $('coordinates').addEventListener('submit', event => { event.preventDefault(); const fields = new FormData(event.target); nearest(Number(fields.get('latitude')), Number(fields.get('longitude')), 'entered coordinates'); });
 $('locate').addEventListener('click', () => {

@@ -73,7 +73,16 @@
 .about a{display:inline-block;margin:0 20px 8px 0}footer{display:flex;justify-content:space-between;gap:20px;padding-top:23px;padding-bottom:30px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}footer span{font-weight:650;white-space:nowrap}footer p{margin:0}
 .skip{position:absolute;left:10px;top:-70px;background:var(--ink);color:var(--color-white);padding:12px;z-index:10000}
 .skip:focus{top:10px}[hidden]{display:none!important}
-@media(min-width:900px){#results{max-height:650px;overflow:auto;padding-right:5px}}
+@media(min-width:900px){
+#results{overflow:auto;scrollbar-gutter:stable;padding-right:5px;scrollbar-width:thin;scrollbar-color:transparent transparent}
+#results.results-expanded{max-height:760px}
+#results:hover,#results:focus-within{scrollbar-color:var(--color-border-strong) transparent}
+#results::-webkit-scrollbar{width:8px}
+#results::-webkit-scrollbar-thumb{background:transparent;border-radius:8px}
+#results:hover::-webkit-scrollbar-thumb,#results:focus-within::-webkit-scrollbar-thumb{background:var(--color-border-strong)}
+}
+@media(hover:none){#results{scrollbar-color:auto}}
+@media(forced-colors:active){#results{scrollbar-color:auto}}
 @media(max-width:900px){.masthead,main,footer{padding-left:24px;padding-right:24px}
 .intro-note{display:none}
 .intro{padding-top:36px}
@@ -126,3 +135,5 @@
 #google-search{margin-bottom:18px}#google-input gmp-place-autocomplete{display:block;width:100%;color-scheme:light}
 
 #catalogue-summary{min-height:44px;padding:12px 0;font-size:13px;color:var(--muted)}
+
+.listing-placeholder{height:225px;margin-bottom:14px;border:1px solid var(--color-border);border-radius:14px;background:var(--color-brand-soft)}
