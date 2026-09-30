@@ -26,6 +26,20 @@ export function bannerSettings(settings, origin) {
   };
 }
 
+export function createBannerLink(settings, className, text = '') {
+  const link = document.createElement('a');
+  link.className = className;
+  link.href = settings.url;
+  link.textContent = text;
+  link.rel = 'sponsored noopener noreferrer';
+  link.referrerPolicy = 'no-referrer';
+  return link;
+}
+
+export function removeFailedBannerArtwork(imageLink) {
+  imageLink.remove();
+}
+
 export async function loadBanners() {
   const slots = [...document.querySelectorAll('[data-banner-slot]')];
   try {
@@ -48,15 +62,16 @@ export async function loadBanners() {
         disclosure.textContent = settings.disclosure;
         content.append(disclosure);
       }
-      const link = document.createElement('a');
-      link.className = 'banner-button'; link.href = settings.url; link.textContent = settings.button;
-      link.rel = 'sponsored noopener noreferrer'; link.referrerPolicy = 'no-referrer';
+      const link = createBannerLink(settings, 'banner-button', settings.button);
       slot.replaceChildren();
       if (settings.image) {
         const img = document.createElement('img');
         img.src = settings.image; img.alt = settings.imageAlt; img.className = 'banner-image';
-        img.addEventListener('error', () => img.remove(), { once: true });
-        slot.append(img);
+        const imageLink = createBannerLink(settings, 'banner-image-link');
+        imageLink.setAttribute('aria-label', settings.button);
+        imageLink.append(img);
+        img.addEventListener('error', () => removeFailedBannerArtwork(imageLink), { once: true });
+        slot.append(imageLink);
       }
       slot.append(content, link);
       slot.hidden = false;

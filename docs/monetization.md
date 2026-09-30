@@ -83,4 +83,4 @@ Do not insert a consumer referral code or an invented tracking URL. Verify the d
 
 ## Klook placement
 
-The map-side desktop card uses the Klook-generated Singapore destination link for Explorer affiliate ID 137209 and ad ID 1467353. It is labelled Affiliate with the enforced commission disclosure. No third-party Klook script or visitor-location parameters are added. Mobile retains the existing AdSense/fallback placement below listings; the map-side card remains desktop-only. Airalo and Saily remain inactive pending approval.
+The map-side desktop card uses the Klook-generated Singapore destination link for Explorer affiliate ID 137209 and ad ID 1467353. It is labelled Affiliate with the enforced commission disclosure and uses Klook's official 300×250 “joyful experiences” static creative, stored locally so viewing the Explorer does not contact Klook. No third-party Klook script or visitor-location parameters are added; Klook receives data only after a visitor follows the affiliate link. Mobile retains the existing AdSense/fallback placement below listings; the map-side card remains desktop-only. Airalo and Saily remain inactive pending approval.

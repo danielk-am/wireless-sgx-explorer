@@ -5,7 +5,9 @@
       "title": "More to explore in Singapore",
       "description": "Browse Singapore attractions, tours and activities on Klook. Check availability and booking terms before buying.",
       "button": "Explore Singapore on Klook ↗",
-      "url": "https://affiliate.klook.com/redirect?aid=137209&aff_adid=1467353&k_site=https%3A%2F%2Fwww.klook.com%2Fen-SG%2Fdestination%2Fc6-singapore%2F"
+      "url": "https://affiliate.klook.com/redirect?aid=137209&aff_adid=1467353&k_site=https%3A%2F%2Fwww.klook.com%2Fen-SG%2Fdestination%2Fc6-singapore%2F",
+      "image": "/banner-assets/klook-joy-300x250.png",
+      "imageAlt": "Discover a world of joyful experiences with Klook"
     },
     "explorer-bottom": {
       "state": "available",

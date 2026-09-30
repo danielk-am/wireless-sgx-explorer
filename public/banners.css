@@ -3,6 +3,7 @@
 .banner-copy h2{font-size:25px;line-height:1.2;margin:0 0 8px}.banner-copy>p:last-child{font-size:13px;color:var(--color-muted);margin:0;max-width:520px}
 .banner-button{display:inline-flex;justify-content:center;align-items:center;min-height:46px;padding:12px 18px;background:var(--color-brand);color:var(--color-white);border-radius:9px;font-size:13px;font-weight:650;text-decoration:none;text-align:center;flex-shrink:0;max-width:100%}
 .banner-button:hover{background:var(--color-brand-hover)}
+.banner-image-link{display:flex;width:100%;justify-content:center}
 .banner-image{width:180px;height:120px;object-fit:contain;flex-shrink:0;border-radius:8px;background:var(--color-white)}
 .banner-slot--side{margin-top:24px;min-height:220px;align-items:flex-start;flex-direction:column;gap:16px}
 .banner-slot--side .banner-image{width:100%;height:180px}.banner-slot--wide{margin-top:36px;min-height:180px}

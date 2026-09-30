@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { bannerSettings, safeLink } from '../public/banners.js';
+import { bannerSettings, createBannerLink, removeFailedBannerArtwork, safeLink } from '../public/banners.js';
 const origin = 'https://wireless.danielk.am';
 const sample = { state: 'available', title: 'Ad space', url: '/advertise.html' };
 test('banner links reject executable and non-web schemes', () => {
@@ -25,4 +25,28 @@ test('affiliate offers enforce a clear label and commission disclosure', () => {
   assert.equal(settings.disclosure, 'We may earn a commission if you buy through this link.');
   assert.equal(bannerSettings(sample, origin).disclosure, '');
   assert.equal(bannerSettings({ ...sample, state: 'affiliate', url: '' }, origin), null);
+});
+
+test('affiliate artwork and button use the same protected destination', () => {
+  const previousDocument = globalThis.document;
+  globalThis.document = {
+    createElement(tagName) { return { tagName, className: '', href: '', textContent: '', rel: '', referrerPolicy: '' }; }
+  };
+  try {
+    const settings = bannerSettings({ ...sample, state: 'affiliate', image: '/banner-assets/klook.png' }, origin);
+    const artwork = createBannerLink(settings, 'banner-image-link');
+    const button = createBannerLink(settings, 'banner-button', settings.button);
+    assert.equal(artwork.href, button.href);
+    assert.equal(artwork.rel, 'sponsored noopener noreferrer');
+    assert.equal(artwork.referrerPolicy, 'no-referrer');
+    assert.equal(button.textContent, 'Learn more');
+  } finally {
+    globalThis.document = previousDocument;
+  }
+});
+
+test('failed affiliate artwork removes its otherwise empty keyboard link', () => {
+  let removed = false;
+  removeFailedBannerArtwork({ remove() { removed = true; } });
+  assert.equal(removed, true);
 });
