@@ -1,0 +1,23 @@
+services:
+  explorer:
+    image: node:22-slim
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3000"
+      ALLOWED_HOSTS: "127.0.0.1,localhost,[::1],.${BASE44_SANDBOX_HOST_DOMAIN}"
+      ALLOWED_ORIGINS: "https://3000-${BASE44_PUBLIC_HOST_SUFFIX}"
+      HOTSPOTS_DATA_PATH: /app/data/public-hotspots.json
+      HOTSPOTS_METADATA_PATH: /app/data/public-metadata.json
+    volumes:
+      - .:/app
+    command: ["sh", "-ec", "npm ci --ignore-scripts && exec node --watch src/http.js"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    restart: on-failure

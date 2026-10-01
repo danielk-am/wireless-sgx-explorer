@@ -4,7 +4,6 @@ import { timingSafeEqual, randomUUID, randomBytes } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { hostHeaderValidation } from '@modelcontextprotocol/sdk/server/middleware/hostHeaderValidation.js';
 import { createMcpServer } from './mcp.js';
 import { lookup, datasetInfo, venues } from './catalogue.js';
 
@@ -25,7 +24,13 @@ export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowe
   .replace('<a id="license-link" hidden',source.license_url ? `<a id="license-link" href="${escapeHtml(source.license_url)}"` : '<a id="license-link" hidden');
  const googleCsp = "default-src 'self'; script-src 'self' 'unsafe-eval' https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.google.com data: blob:; font-src 'self' https://fonts.gstatic.com; frame-src https://*.google.com; worker-src blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
  const app=express();app.disable('x-powered-by');
- app.use(hostHeaderValidation(allowedHosts));
+ app.use((req,res,next)=>{
+  const hostHeader=req.headers.host;
+  if(!hostHeader)return res.status(403).json({jsonrpc:'2.0',error:{code:-32000,message:'Missing Host header'},id:null});
+  let hostname;try{hostname=new URL(`http://${hostHeader}`).hostname;}catch{return res.status(403).json({jsonrpc:'2.0',error:{code:-32000,message:`Invalid Host header: ${hostHeader}`},id:null});}
+  if(!allowedHosts.some(h=>h.startsWith('.')?hostname.endsWith(h):hostname===h))return res.status(403).json({jsonrpc:'2.0',error:{code:-32000,message:`Invalid Host: ${hostname}`},id:null});
+  next();
+ });
  app.use((req,res,next)=>{
   const requestHost=(req.headers.host||'').split(':')[0].toLowerCase();
   if(canonicalHost&&redirectHosts.includes(requestHost))return res.redirect(308,`https://${canonicalHost}${req.originalUrl}`);
