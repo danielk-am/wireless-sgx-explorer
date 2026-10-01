@@ -9,12 +9,20 @@ import { createMcpServer } from './mcp.js';
 import { lookup, datasetInfo, venues } from './catalogue.js';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
+const escapeHtml=value=>String(value ?? '').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const jsonError=(code,message)=>({ok:false,error:{code,message}});
 const equal=(a,b)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);};
 
 export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowedOrigins=[],canonicalHost='',redirectHosts=[],mcpToken='',mapsBrowserKey=process.env.GOOGLE_MAPS_BROWSER_KEY||'',adsenseClient=process.env.ADSENSE_CLIENT||'',adsenseSlot=process.env.ADSENSE_SLOT||'',rateLimit=120}={}) {
  const adsEnabled=/^ca-pub-[0-9]{16}$/.test(adsenseClient)&&/^[0-9]{10}$/.test(adsenseSlot);
- const indexHtml=readFileSync(resolve(root,'public/index.html'),'utf8');
+ const metadata=datasetInfo();
+ const source=metadata.source || {};
+ const sourceSummary=`<p id="source-note" class="source-summary">${escapeHtml(metadata.entry_count)} hotspot entries grouped into ${escapeHtml(metadata.venue_count)} venues. Source: ${escapeHtml(source.title || 'IMDA hotspot catalogue')}. Dataset date: ${escapeHtml(metadata.catalogue_date)}.${source.source_feature_updated_at ? ` Record date: ${escapeHtml(source.source_feature_updated_at)}.` : ''} Historical listings; current service and access are unverified. <a href="${escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer">View the source</a>.</p>`;
+ const indexHtml=readFileSync(resolve(root,'public/index.html'),'utf8').replace('<p id="source-note">Source details loading…</p>',sourceSummary)
+  .replace('<p id="source-age"></p>',`<p id="source-age">${escapeHtml(source.date_note || '')}</p>`)
+  .replace('<p id="source-attribution"></p>',`<p id="source-attribution">${escapeHtml(source.attribution || '')}</p>`)
+  .replace('<a id="source-link" hidden',`<a id="source-link" href="${escapeHtml(source.url)}"`)
+  .replace('<a id="license-link" hidden',source.license_url ? `<a id="license-link" href="${escapeHtml(source.license_url)}"` : '<a id="license-link" hidden');
  const googleCsp = "default-src 'self'; script-src 'self' 'unsafe-eval' https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.google.com data: blob:; font-src 'self' https://fonts.gstatic.com; frame-src https://*.google.com; worker-src blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
  const app=express();app.disable('x-powered-by');
  app.use(hostHeaderValidation(allowedHosts));
@@ -72,7 +80,7 @@ export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowe
  app.all('/mcp',(_req,res)=>res.status(405).set('Allow','POST').json({jsonrpc:'2.0',id:null,error:{code:-32000,message:'Stateless MCP supports POST only.'}}));
  // Nonces are generated per document, never cached or reused across responses.
  app.get(['/', '/index.html'],(_req,res,next)=>{
-  if(!adsEnabled)return next();
+  if(!adsEnabled)return res.type('html').send(indexHtml);
   const nonce=randomBytes(24).toString('base64');
   const ad=`<section class="network-ad" aria-label="Advertisement"><p class="banner-label">Advertisement</p><ins class="adsbygoogle" style="display:block;width:100%;height:250px" data-ad-client="${adsenseClient}" data-ad-slot="${adsenseSlot}"></ins></section>`;
   const html=indexHtml.replace('<!-- ADSENSE_UNIT -->',ad)

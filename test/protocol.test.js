@@ -94,3 +94,26 @@ test('legacy public hostname redirects permanently to the canonical hostname',as
   assert.equal(canonical,200);
  } finally {server.closeAllConnections();await new Promise(r=>server.close(r));}
 });
+
+test('search page serves provenance without JavaScript, with and without ads',async()=>{
+ for(const options of [{},{adsenseClient:'ca-pub-1234567890123456',adsenseSlot:'1234567890'}]) {
+  const {server,url}=await serve(options);
+  try {
+   const metadata=await (await fetch(url+'/api/dataset')).json();
+   const html=await (await fetch(url)).text();
+   assert(html.includes('Find Wi-Fi hotspots<br>near you in Singapore.'));
+   assert(html.includes(`${metadata.entry_count} hotspot entries grouped into ${metadata.venue_count} venues`));
+   assert(html.includes(`Dataset date: ${metadata.catalogue_date}`));
+   if(metadata.source.source_feature_updated_at)assert(html.includes(`Record date: ${metadata.source.source_feature_updated_at}`));
+   assert(!html.includes('<!-- SOURCE_SUMMARY -->'));
+   assert(html.includes('rel="canonical" href="https://wifiexplorer.danielk.am/"'));
+   assert(html.includes('https://schema.org/WebApplication'));
+   assert(html.includes('The distance is an approximate straight line'));
+   const robots=await (await fetch(url+'/robots.txt')).text();
+   assert(robots.includes('Sitemap: https://wifiexplorer.danielk.am/sitemap.xml'));
+   const sitemap=await fetch(url+'/sitemap.xml');
+   assert.equal(sitemap.status,200);
+   assert((await sitemap.text()).includes('<loc>https://wifiexplorer.danielk.am/</loc>'));
+  } finally {server.closeAllConnections();await new Promise(r=>server.close(r));}
+ }
+});
