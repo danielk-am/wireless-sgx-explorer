@@ -1,6 +1,6 @@
 const colorToken = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 import { hasCoordinates, searchVenues, distanceLabel, safeGoogleUrl } from './helpers.js';
-import { attachAutocomplete, createGoogleMap } from './google-maps.js?v=google-1';
+import { attachAutocomplete, createGoogleMap } from './google-maps.js?v=google-2';
 const $ = id => document.getElementById(id);
 const state = { venues: [], shown: [], limit: 3, map: null, markers: null, origin: null, startingPoint: null, request: 0, loaded: false, mapsKey: '', googleView: null };
 const number = value => value.toLocaleString('en-SG');
@@ -87,7 +87,7 @@ function showStartingPoint() {
   if (!state.map) return;
   const { latitude, longitude } = state.startingPoint;
   if (state.origin) state.origin.remove();
-  state.origin = window.L.circleMarker([latitude, longitude], { bubblingMouseEvents: false, radius: 9, color: colorToken('--color-origin'), fillColor: colorToken('--color-origin'), fillOpacity: .85, weight: 3 }).addTo(state.map).bindTooltip('Your selected starting point');
+  state.origin = window.L.circleMarker([latitude, longitude], { bubblingMouseEvents: false, radius: 9, color: colorToken('--color-origin'), fillColor: colorToken('--color-marker-outline'), fillOpacity: 1, weight: 4 }).addTo(state.map).bindTooltip('Your selected starting point');
   state.map.setView([latitude, longitude], 15);
 }
 function searchNearby() {

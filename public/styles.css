@@ -46,7 +46,7 @@
 .distance{font-size:14px;white-space:nowrap;font-weight:650;color:var(--color-brand-hover)}
 .badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 .badge{padding:4px 8px;border-radius:5px;font-size:10px;background:var(--color-brand-soft);color:var(--color-brand-hover)}
-.badge.unlocated{background:var(--color-blue-soft);color:var(--color-blue-ink)}
+.badge.unlocated{background:var(--color-teal-soft);color:var(--color-teal-hover)}
 .card details{font-size:12px;border-top:1px solid var(--line);padding-top:12px}
 .card summary{min-height:25px;font-weight:600}
 .card ul{padding-left:18px;max-height:240px;overflow:auto;line-height:1.6}

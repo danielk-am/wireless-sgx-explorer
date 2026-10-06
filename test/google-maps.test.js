@@ -42,7 +42,7 @@ test('Google map uses fixed-size point icons, replaces results and clears origin
   class InfoWindow { close() {} }
   const previousGoogle = globalThis.google; const previousDocument = globalThis.document; const previousStyle = globalThis.getComputedStyle;
   globalThis.google = { maps: { importLibrary: async () => ({ Map, Data, InfoWindow, SymbolPath: { CIRCLE: 0 } }) } };
-  globalThis.document = {documentElement:{}}; globalThis.getComputedStyle = () => ({getPropertyValue:()=> '#087E8B'});
+  globalThis.document = {documentElement:{}}; globalThis.getComputedStyle = () => ({getPropertyValue:()=> '#2563EB'});
   try {
     const view = await createGoogleMap('public-test', {}, () => {});
     const venue = {name:'Listed venue',latitude:1.3,longitude:103.85};

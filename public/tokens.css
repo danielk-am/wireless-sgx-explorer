@@ -1,15 +1,18 @@
-/* danielk.am default color tokens v1 — adopted by Daniel on 2026-09-30.
-   White surfaces, teal primary, blue accent. Canonical source: danielk.am
+/* danielk.am default color tokens v2 — approved by Daniel on 2026-10-02.
+   White surfaces, blue primary, supporting teal. Canonical source: danielk.am
    brand/color-tokens.css in Daniel's shared Drive. Keep project copies aligned. */
 :root {
   color-scheme: light;
   --color-white: #FFFFFF;
   --color-ink: #153847;
   --color-muted: #526B78;
-  --color-brand: #087E8B;
-  --color-brand-hover: #066571;
-  --color-brand-soft: #F0F9FA;
-  --color-brand-soft-hover: #E0F1F4;
+  --color-brand: #2563EB;
+  --color-brand-hover: #1D4ED8;
+  --color-brand-soft: #EDF3FF;
+  --color-brand-soft-hover: #DFE9FF;
+  --color-teal: #087E8B;
+  --color-teal-hover: #066571;
+  --color-teal-soft: #F0F9FA;
   --color-blue: #2563EB;
   --color-blue-soft: #EDF3FF;
   --color-blue-ink: #2451A6;

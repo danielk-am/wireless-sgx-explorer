@@ -49,7 +49,7 @@ export async function createGoogleMap(key, element, onPoint) {
   const layer = new Data({ map });
   const origins = new Data({ map });
   layer.setStyle(feature => ({ title: feature.getProperty('venue').name, icon: { path: SymbolPath.CIRCLE, scale: 6, fillColor: color('--color-marker'), fillOpacity: .95, strokeColor: color('--color-marker-outline'), strokeWeight: 2 } }));
-  origins.setStyle({ clickable: false, zIndex: 2, icon: { path: SymbolPath.CIRCLE, scale: 9, fillColor: color('--color-origin'), fillOpacity: .9, strokeColor: color('--color-marker-outline'), strokeWeight: 2 } });
+  origins.setStyle({ clickable: false, zIndex: 2, icon: { path: SymbolPath.CIRCLE, scale: 9, fillColor: color('--color-marker-outline'), fillOpacity: 1, strokeColor: color('--color-origin'), strokeWeight: 4 } });
   const popup = new InfoWindow();
   const clear = data => { const features = []; data.forEach(feature => features.push(feature)); features.forEach(feature => data.remove(feature)); };
   let makePopup;
