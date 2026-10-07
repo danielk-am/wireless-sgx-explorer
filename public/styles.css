@@ -8,9 +8,7 @@
 .intro{display:flex;justify-content:space-between;padding:56px 0 30px;gap:36px}
 .eyebrow{font-size:10px;letter-spacing:2.1px;font-weight:750;margin-bottom:13px}
 .lede{max-width:620px;color:var(--muted);font-size:17px;margin-bottom:0}
-.intro-note{align-self:center;display:flex;gap:20px;align-items:center;font-size:14px;min-width:235px;transform:rotate(-4deg)}
-.intro-note>span{font-size:95px;font-weight:200;color:var(--accent)}
-.intro-note p{margin:0;line-height:1.4}
+.intro-art{align-self:center;flex-shrink:0;width:clamp(200px,24vw,320px);height:auto}
 .finder{padding:26px 28px 15px;background:var(--color-brand-soft);border:1px solid var(--color-border);border-radius:15px}
 .finder label{display:block;font-size:14px;font-weight:650;margin-bottom:9px}
 .search-row{display:flex;gap:10px}
@@ -84,8 +82,8 @@
 @media(hover:none){#results{scrollbar-color:auto}}
 @media(forced-colors:active){#results{scrollbar-color:auto}}
 @media(max-width:900px){.masthead,main,footer{padding-left:24px;padding-right:24px}
-.intro-note{display:none}
-.intro{padding-top:36px}
+.intro-art{width:200px}
+.intro{padding-top:36px;align-items:center}
 .workspace{grid-template-columns:1fr 1fr;gap:18px}
 .finder{padding:22px}
 .coordinate-entry{flex:auto}
@@ -99,6 +97,7 @@
 .brand-mark{width:34px;height:34px}
 .about-link{font-size:10px}
 .intro{padding:31px 0 24px}h1{font-size:42px;letter-spacing:-2px}
+.intro-art{display:none}
 .lede{font-size:14px}
 .finder{padding:18px 15px}
 .search-row{flex-wrap:wrap}
