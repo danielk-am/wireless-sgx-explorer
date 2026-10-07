@@ -142,7 +142,7 @@ async function load() {
     const { response, data } = await requestJSON('/api/venues'); if (!response.ok) throw new Error('Catalogue unavailable'); if (!Array.isArray(data.venues)) throw new Error('Unexpected catalogue response');
     state.venues = data.venues; state.loaded = true;
     if (data.metadata?.catalogue_date && data.metadata?.coordinate_dataset_date) {
-      const dates = `Catalogue: ${data.metadata.catalogue_date}. Coordinate reference: ${data.metadata.coordinate_dataset_date}.`; $('source-note').textContent = dates; $('catalogue-date').textContent = ` · ${dates}`;
+      const dates = `Catalogue: ${data.metadata.catalogue_date}. Coordinate reference: ${data.metadata.coordinate_dataset_date}.`; $('catalogue-date').textContent = ` · ${dates}`;
     }
     const source = data.metadata?.source || {};
     for (const [id, url] of [['catalogue-link', source.url], ['source-link', source.url], ['coordinate-link', source.coordinate_dataset_url], ['license-link', source.license_url]]) {

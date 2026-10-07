@@ -101,7 +101,8 @@ test('search page serves provenance without JavaScript, with and without ads',as
   try {
    const metadata=await (await fetch(url+'/api/dataset')).json();
    const html=await (await fetch(url)).text();
-   assert(html.includes('Find Wi-Fi hotspots<br>near you in Singapore.'));
+   assert(html.includes('Find your next Wi-Fi stop.'));
+   assert(html.indexOf('id="source-note"') < html.indexOf('class="workspace"'));
    assert(html.includes(`${metadata.entry_count} hotspot entries grouped into ${metadata.venue_count} venues`));
    assert(html.includes(`Dataset date: ${metadata.catalogue_date}`));
    if(metadata.source.source_feature_updated_at)assert(html.includes(`Record date: ${metadata.source.source_feature_updated_at}`));
