@@ -2,7 +2,7 @@ const colorToken = name => getComputedStyle(document.documentElement).getPropert
 import { hasCoordinates, searchVenues, distanceLabel, safeGoogleUrl } from './helpers.js';
 import { attachAutocomplete, createGoogleMap } from './google-maps.js?v=google-2';
 const $ = id => document.getElementById(id);
-const state = { venues: [], shown: [], limit: 3, map: null, markers: null, origin: null, startingPoint: null, request: 0, loaded: false, mapsKey: '', googleView: null };
+const state = { venues: [], shown: [], limit: 3, map: null, mapLoading: false, markers: null, origin: null, startingPoint: null, request: 0, loaded: false, mapsKey: '', googleView: null };
 const number = value => value.toLocaleString('en-SG');
 async function requestJSON(url, options = {}) {
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 15000);
@@ -78,6 +78,7 @@ async function nearest(latitude, longitude, label, query) {
     status(`Found ${data.results.length} nearby listed venues. Check floor details and access before travelling.`);
     showStartingPoint();
     render();
+    void showMap();
   } catch (error) { if (request === state.request) status(`Unable to find nearby venues: ${error.message} Your previous results remain visible. Try again or browse the catalogue.`); }
   finally { if (request === state.request) busy(false); }
 }
@@ -110,7 +111,9 @@ function venuePopup(venue) {
     }); popup.append(button); return popup;
 }
 async function showMap() {
+  if (state.map || state.mapLoading) return;
   if (!state.loaded) { status('Please wait for the catalogue to load, or use Retry catalogue.'); return; }
+  state.mapLoading = true;
   const button = $('show-map'); button.disabled = true; button.textContent = 'Loading map…';
   try {
     if (state.mapsKey) {
@@ -125,6 +128,7 @@ async function showMap() {
     state.markers = window.L.layerGroup().addTo(state.map); renderMarkers(); showStartingPoint();
     state.map.on('click', event => nearest(event.latlng.lat, event.latlng.lng, 'selected map point'));
   } catch { status('The map could not load. You can still search and browse all locations in the list.'); if (button.isConnected) { button.disabled = false; button.textContent = 'Retry map'; } }
+  finally { state.mapLoading = false; }
 }
 async function load() {
   try {
