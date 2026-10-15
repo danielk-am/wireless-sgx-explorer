@@ -1,4 +1,5 @@
 import express from 'express';
+import { analyticsHead, analyticsPolicy } from './analytics.mjs';
 import { readFileSync } from 'node:fs';
 import { timingSafeEqual, randomUUID, randomBytes } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -13,7 +14,7 @@ const escapeHtml=value=>String(value ?? '').replace(/[&<>"']/g,char=>({'&':'&amp
 const jsonError=(code,message)=>({ok:false,error:{code,message}});
 const equal=(a,b)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);};
 
-export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowedOrigins=[],canonicalHost='',redirectHosts=[],mcpToken='',mapsBrowserKey=process.env.GOOGLE_MAPS_BROWSER_KEY||'',adsenseClient=process.env.ADSENSE_CLIENT||'',adsenseSlot=process.env.ADSENSE_SLOT||'',rateLimit=120}={}) {
+export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowedOrigins=[],canonicalHost='',redirectHosts=[],mcpToken='',mapsBrowserKey=process.env.GOOGLE_MAPS_BROWSER_KEY||'',analyticsMeasurementId=process.env.GA_MEASUREMENT_ID||'',adsenseClient=process.env.ADSENSE_CLIENT||'',adsenseSlot=process.env.ADSENSE_SLOT||'',rateLimit=120}={}) {
  const adsEnabled=/^ca-pub-[0-9]{16}$/.test(adsenseClient)&&/^[0-9]{10}$/.test(adsenseSlot);
  const metadata=datasetInfo();
  const source=metadata.source || {};
@@ -22,7 +23,8 @@ export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowe
   .replace('<p id="source-age"></p>',`<p id="source-age">${escapeHtml(source.date_note || '')}</p>`)
   .replace('<p id="source-attribution"></p>',`<p id="source-attribution">${escapeHtml(source.attribution || '')}</p>`)
   .replace('<a id="source-link" hidden',`<a id="source-link" href="${escapeHtml(source.url)}"`)
-  .replace('<a id="license-link" hidden',source.license_url ? `<a id="license-link" href="${escapeHtml(source.license_url)}"` : '<a id="license-link" hidden');
+  .replace('<a id="license-link" hidden',source.license_url ? `<a id="license-link" href="${escapeHtml(source.license_url)}"` : '<a id="license-link" hidden')
+  .replace('</head>',`${analyticsHead(analyticsMeasurementId)}</head>`);
  const googleCsp = "default-src 'self'; script-src 'self' 'unsafe-eval' https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.google.com data: blob:; font-src 'self' https://fonts.gstatic.com; frame-src https://*.google.com; worker-src blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
  const app=express();app.disable('x-powered-by');
  app.use(hostHeaderValidation(allowedHosts));
@@ -37,7 +39,7 @@ export function createApp({allowedHosts=['localhost','127.0.0.1','[::1]'],allowe
    'X-Content-Type-Options':'nosniff',
    'Referrer-Policy':'strict-origin-when-cross-origin',
    'Permissions-Policy':'geolocation=(self), camera=(), microphone=()',
-   'Content-Security-Policy':mapsBrowserKey ? googleCsp : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+   'Content-Security-Policy':analyticsPolicy(mapsBrowserKey ? googleCsp : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'", analyticsMeasurementId)
   });
   if(req.headers.origin) {
    let same=false;try{const origin=new URL(req.headers.origin);same=['http:','https:'].includes(origin.protocol)&&origin.host===req.headers.host;}catch{}
