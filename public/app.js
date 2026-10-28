@@ -145,6 +145,7 @@ async function load() {
     }
     const { response, data } = await requestJSON('/api/venues'); if (!response.ok) throw new Error('Catalogue unavailable'); if (!Array.isArray(data.venues)) throw new Error('Unexpected catalogue response');
     state.venues = data.venues; state.loaded = true;
+    if (document.activeElement === $('query') && $('query').value) $('query').dispatchEvent(new Event('input'));
     if (data.metadata?.catalogue_date && data.metadata?.coordinate_dataset_date) {
       const dates = `Catalogue: ${data.metadata.catalogue_date}. Coordinate reference: ${data.metadata.coordinate_dataset_date}.`; $('catalogue-date').textContent = ` · ${dates}`;
     }
@@ -191,3 +192,36 @@ $('locate').addEventListener('click', () => {
   navigator.geolocation.getCurrentPosition(position => { if (request !== state.request) return; $('locate').disabled = false; nearest(position.coords.latitude, position.coords.longitude, 'your location'); }, () => { if (request !== state.request) return; $('locate').disabled = false; status('Your location could not be obtained. You can search a venue, enter coordinates or choose a point on the map.'); }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 });
 });
 load();
+
+(function(){
+ const config={"selector":"#query"};
+ let nextId=0;
+ for(const input of document.querySelectorAll(config.selector||'input[type="search"][name="q"],input[type="search"][name="s"]')){
+  const form=input.form;if(!form)continue;
+  const list=document.createElement('div');list.id='search-suggestions-'+(++nextId);list.className='search-suggestions';list.role='listbox';list.setAttribute('aria-label','Matching listed venues');list.hidden=true;document.body.append(list);
+  const status=document.createElement('span');status.className='search-suggestions-status';status.setAttribute('role','status');form.append(status);
+  input.setAttribute('role','combobox');input.setAttribute('aria-autocomplete','list');input.setAttribute('aria-controls',list.id);input.setAttribute('aria-expanded','false');input.setAttribute('autocomplete','off');
+  let timer,controller,version=0,items=[],selected=-1,composing=false;
+  const close=()=>{clearTimeout(timer);controller?.abort();version++;list.hidden=true;input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');selected=-1;};
+  const position=()=>{if(list.hidden)return;const r=input.getBoundingClientRect();list.style.left=Math.max(8,r.left)+'px';list.style.top=(r.bottom+4)+'px';list.style.width=Math.min(Math.max(r.width,280),innerWidth-Math.max(8,r.left)-8)+'px';list.style.maxHeight=Math.max(100,Math.min(380,innerHeight-r.bottom-12))+'px';};
+  const choose=i=>{if(items[i]){const p=items[i];input.value=p.title;close();if(hasCoordinates(p.venue))nearest(p.venue.latitude,p.venue.longitude,p.title);else searchNearby();}};
+  const select=i=>{selected=i;for(const [n,option]of [...list.children].entries())option.setAttribute('aria-selected',String(n===i));if(i>=0){input.setAttribute('aria-activedescendant',list.children[i].id);list.children[i].scrollIntoView({block:'nearest'});}else input.removeAttribute('aria-activedescendant');};
+  async function update(){
+   close();status.textContent='';const q=input.value.trim();if(composing||q.length<2||q.length>120)return;
+   const requestVersion=version;controller=new AbortController();const signal=controller.signal;
+   const params=new URLSearchParams({q});
+   if(!input.closest('header')&&!form.classList.contains('hero-search')){params.set('currentPath',location.pathname);for(const key of ['category','brand','seller']){const v=new FormData(form).get(key);if(v)params.set(key,v);}}
+   try{
+    items=searchVenues(state.venues,q).slice(0,6).map(v=>({title:v.name,seller:v.address,venue:v}));
+    list.replaceChildren();
+    items.forEach((p,i)=>{const option=document.createElement('div');option.id=list.id+'-'+i;option.role='option';option.setAttribute('aria-selected','false');const title=document.createElement('span');title.textContent=p.title;option.append(title);if(p.seller){const seller=document.createElement('small');seller.textContent=p.seller;option.append(seller);}option.addEventListener('pointerdown',e=>e.preventDefault());option.addEventListener('click',()=>choose(i));list.append(option);});
+    status.textContent=items.length?items.length+' venue suggestions available. Use arrow keys to select.':'No matching venue suggestions.';
+    list.hidden=!items.length;input.setAttribute('aria-expanded',String(!!items.length));position();
+   }catch{if(!signal.aborted&&requestVersion===version){close();status.textContent='';}}
+  }
+  const schedule=()=>{close();if(!composing)timer=setTimeout(update,180);};
+  input.addEventListener('input',schedule);input.addEventListener('focus',schedule);input.addEventListener('compositionstart',()=>{composing=true;close();});input.addEventListener('compositionend',()=>{composing=false;schedule();});
+  input.addEventListener('keydown',e=>{if(composing||e.isComposing)return;if(e.key==='Escape'){close();return;}if(list.hidden)return;if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();select((selected+(e.key==='ArrowDown'?1:selected<0?0:-1)+items.length)%items.length);}else if(e.key==='Enter'&&selected>=0){e.preventDefault();choose(selected);}else if(e.key==='Tab')close();});
+  input.addEventListener('blur',close);form.addEventListener('submit',close);form.addEventListener('change',e=>{if(e.target!==input)close();});window.addEventListener('resize',position);window.addEventListener('scroll',position,true);
+ }
+})();

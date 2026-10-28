@@ -51,7 +51,7 @@ test('optional Analytics renders a configured tag under normal and ads CSP',asyn
  for(const ads of [{},{adsenseClient:'ca-pub-1234567890123456',adsenseSlot:'1234567890'}]){
   const server=createApp({...ads,analyticsMeasurementId:'G-AB12345678'}).listen(0,'127.0.0.1');await once(server,'listening');
   try{const response=await fetch(`http://127.0.0.1:${server.address().port}/`);const html=await response.text();const csp=response.headers.get('content-security-policy');assert.match(html,/<meta name="ga-measurement-id" content="G-AB12345678">/);assert.match(html,/src="\/analytics\.js"/);
-   if(ads.adsenseClient){const nonce=csp.match(/'nonce-([^']+)'/)[1];assert.match(html,new RegExp(`<script nonce="${nonce}" type="module" src="/analytics\\.js"`));}
+   if(ads.adsenseClient){const nonce=csp.match(/'nonce-([^']+)'/)[1];assert.ok(html.includes(`<script nonce="${nonce}" type="module" src="/analytics.js"`));}
    else{assert.match(csp,/script-src 'self' https:\/\/www.googletagmanager.com/);assert.match(csp,/https:\/\/www.google-analytics.com/);}
   }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
  }
