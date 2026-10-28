@@ -4,10 +4,10 @@ import { analyticsHead, analyticsPolicy } from '../src/analytics.mjs';
 // protects=tag delivery under native CSP; fails_when=Analytics is blocked or unrelated policy weakened.
 const policy = "default-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; frame-ancestors 'none'";
 test('valid native configuration loads only fixed script plus validated public measurement ID', () => {
- assert.equal(analyticsHead('G-AB12345678'), '<meta name="ga-measurement-id" content="G-AB12345678"><script type="module" src="/analytics.js"></script>');
+ assert.equal(analyticsHead('G-AB12345678'), '<script defer src="/portfolio-umami.js"></script><meta name="ga-measurement-id" content="G-AB12345678"><script type="module" src="/analytics.js"></script>');
 });
-test('invalid or missing ID cannot alter HTML or CSP', () => {
- for (const id of ['', undefined, '<script>', 'G-OK"onload="bad', 12]) { assert.equal(analyticsHead(id),''); assert.equal(analyticsPolicy(policy,id),policy); }
+test('invalid or missing GA ID cannot inject HTML or enable Google destinations', () => {
+ for (const id of ['', undefined, '<script>', 'G-OK"onload="bad', 12]) { assert.equal(analyticsHead(id),'<script defer src="/portfolio-umami.js"></script>'); const next=analyticsPolicy(policy,id); assert.match(next,/https:\/\/umami\.danielk\.am/); assert.doesNotMatch(next,/googletagmanager|google-analytics|onload|<script>/); }
 });
 test('normal CSP permits GA script and collection without dropping unrelated restrictions', () => {
  const next = analyticsPolicy(policy,'G-AB12345678');
