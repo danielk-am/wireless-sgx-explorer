@@ -1,9 +1,14 @@
 FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && dpkg --compare-versions "$(dpkg-query -W -f '${Version}' perl-base)" ge 5.36.0-7+deb12u4 \
+    && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
 ENV HOTSPOTS_DATA_PATH=/app/data/public-hotspots.json HOTSPOTS_METADATA_PATH=/app/data/public-metadata.json
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force \
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 COPY src ./src
 COPY public ./public
 COPY data/public-hotspots.json data/public-metadata.json ./data/
